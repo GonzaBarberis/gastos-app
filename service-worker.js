@@ -1,5 +1,5 @@
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open("app-cache").then((cache) => cache.addAll(["index.html", "manifest.json", "icons/icon-192.png", "icons/icon-512.png"])));
+  e.waitUntil(caches.open("app-cache").then((cache) => cache.addAll(["index.html", "manifest.json", "icon-192.png", "icon-512.png"])));
 });
 
 self.addEventListener("fetch", (e) => {
