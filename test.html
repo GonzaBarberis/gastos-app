@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Control de Gastos</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Control de Gastos" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#047857" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Manrope", sans-serif;
+      }
+
+      body,
+      html {
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      @keyframes bounce-spin {
+        0% {
+          transform: scale(0.8) rotate(0deg);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.05) rotate(180deg);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1) rotate(360deg);
+          opacity: 1;
+        }
+      }
+
+      .animate-bounce-spin {
+        animation: bounce-spin 2s ease-out forwards;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 text-gray-800">
+    <!-- Header Total -->
+    <!-- <div class="bg-emerald-700 text-white p-4 shadow flex justify-between items-center">
+      <h1 class="text-xl font-semibold tracking-tight"><i class="fas fa-money-bill-alt mr-2"></i>Balance</h1>
+      <span class="text-3xl font-extrabold" id="total">$ 0</span>
+    </div> -->
+    <div class="relative overflow-hidden bg-gradient-to-r from-emerald-700 to-emerald-600 text-white rounded-b-3xl shadow-md p-6 mb-4">
+      <div class="flex justify-between items-center relative z-10">
+        <div>
+          <h1 class="text-lg font-semibold uppercase tracking-wide opacity-90">Balance actual</h1>
+          <p class="text-3xl font-extrabold mt-1" id="total">$ 0</p>
+        </div>
+        <div class="bg-white bg-opacity-20 rounded-full p-2 px-3">
+          <i class="fas fa-sack-dollar text-white text-xl"></i>
+        </div>
+      </div>
+      <div class="absolute right-2 bottom-2 text-white text-[6rem] opacity-10 pointer-events-none select-none">
+        <i class="fas fa-coins"></i>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <!-- <div class="bg-white flex justify-around border-b">
+      <button id="tabGastos" class="py-3 px-4 font-semibold border-b-2 border-green-600 text-green-600 flex items-center gap-2">
+        <i class="fas fa-arrow-down text-sm"></i> GASTOS
+      </button>
+      <button id="tabIngresos" class="py-3 px-4 font-semibold border-b-2 border-gray-300 text-gray-500 flex items-center gap-2">
+        <i class="fas fa-arrow-up text-sm"></i> INGRESOS
+      </button>
+    </div> -->
+
+    <div class="bg-gray-100 px-4">
+      <div class="flex bg-white rounded-full shadow-inner p-1 max-w-xs mx-auto">
+        <button
+          id="tabGastos"
+          class="flex-1 flex items-center justify-center gap-2 py-2 px-4 text-sm font-medium rounded-full transition-all duration-200 text-white bg-emerald-600 shadow-md"
+        >
+          <i class="fas fa-arrow-down text-sm"></i>
+          GASTOS
+        </button>
+        <button
+          id="tabIngresos"
+          class="flex-1 flex items-center justify-center gap-2 py-2 px-4 text-sm font-medium rounded-full text-gray-600 hover:text-emerald-700 transition-all duration-200"
+        >
+          <i class="fas fa-arrow-up text-sm"></i>
+          INGRESOS
+        </button>
+      </div>
+    </div>
+    <!-- Contenido -->
+    <!-- <div class="p-4">
+      <div class="bg-white shadow rounded-xl p-4 max-w-sm mx-auto mb-6">
+        <canvas id="grafico"></canvas>
+      </div>
+
+      <ul id="lista" class="space-y-3 max-w-sm mx-auto overflow-y-auto" style="max-height: 310px"></ul>
+    </div> -->
+
+    <div class="px-4 py-6 bg-gray-50 min-h-[calc(100vh-150px)]">
+      <!-- Gráfico en tarjeta elegante -->
+      <div
+        class="relative max-w-sm mx-auto bg-white rounded-2xl p-5 mb-6 flex flex-col items-center"
+        style="box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px"
+      >
+        <div class="absolute top-2 left-3 text-xs text-gray-400">Últimos movimientos</div>
+        <button
+          id="btnAgregar"
+          class="absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 transition-colors text-white w-14 h-14 rounded-full text-xl shadow-md flex items-center justify-center"
+          title="Agregar"
+        >
+          <i class="fas fa-plus"></i>
+        </button>
+        <canvas id="grafico" class="w-full h-52"></canvas>
+      </div>
+
+      <!-- Lista con scroll -->
+      <ul id="lista" class="space-y-3 max-w-sm mx-auto overflow-y-auto px-1" style="max-height: 440px"></ul>
+    </div>
+
+    <!-- Botón flotante -->
+    <!-- <button
+      id="btnAgregar"
+      class="fixed bottom-6 right-6 bg-yellow-400 hover:bg-yellow-500 transition-colors text-black w-14 h-14 rounded-full text-2xl shadow-xl flex items-center justify-center"
+    >
+      <i class="fas fa-plus"></i>
+    </button> -->
+
+    <!-- Modal para agregar -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
+        <h2 class="text-xl font-bold mb-4 text-center">Nuevo movimiento</h2>
+        <form id="form">
+          <label class="block text-sm font-medium mb-1">Monto</label>
+          <input
+            type="number"
+            id="monto"
+            placeholder="Monto ($)"
+            class="w-full border rounded px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            required
+          />
+
+          <label class="block text-sm font-medium mb-1">Tema</label>
+          <input
+            type="text"
+            id="tema"
+            placeholder="Ej: Placa de video"
+            class="w-full border rounded px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            required
+          />
+
+          <label class="block text-sm font-medium mb-1">Descripción</label>
+          <input
+            type="text"
+            id="descripcion"
+            placeholder="Opcional"
+            class="w-full border rounded px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
+
+          <label class="block text-sm font-medium mb-1">Color del gráfico</label>
+          <!-- <input type="color" id="color" class="w-full h-10 rounded mb-4 border" value="#facc15" /> -->
+          <div class="grid grid-cols-10 gap-2 mb-4" id="colorSelector"></div>
+          <input type="hidden" id="color" value="#facc15" />
+
+          <div class="flex justify-end gap-2">
+            <button type="button" id="cerrarModal" class="text-gray-500 px-4 py-2 border rounded">Cancelar</button>
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded font-semibold">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de monto inicial -->
+    <div id="modalInicial" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4 text-center">¿Con cuánto arrancás?</h2>
+        <label class="block text-sm font-medium mb-1">Monto inicial</label>
+        <input
+          id="inputInicial"
+          type="number"
+          placeholder="Ej: 50000"
+          class="w-full border rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        />
+        <div class="flex justify-end">
+          <button id="guardarInicial" class="bg-emerald-600 hover:bg-emerald-700 transition-colors text-white px-4 py-2 rounded font-semibold">
+            Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de edición -->
+    <div id="modalEditar" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
+        <h2 class="text-xl font-bold mb-4">Editar movimiento</h2>
+        <form id="formEditar">
+          <input type="hidden" id="editIndex" />
+
+          <label class="block text-sm font-medium mb-1">Tema</label>
+          <input type="text" id="editTema" class="w-full border rounded px-3 py-2 mb-3" required />
+
+          <label class="block text-sm font-medium mb-1">Descripción</label>
+          <input type="text" id="editDescripcion" class="w-full border rounded px-3 py-2 mb-3" />
+
+          <label class="block text-sm font-medium mb-1">Monto</label>
+          <input type="number" id="editMonto" class="w-full border rounded px-3 py-2 mb-3" required />
+
+          <label class="block text-sm font-medium mb-1">Color</label>
+          <!-- <input type="color" id="editColor" class="w-full h-10 rounded mb-4 border" /> -->
+          <div class="grid grid-cols-10 gap-2 mb-4" id="editColorSelector"></div>
+          <input type="hidden" id="editColor" value="#facc15" />
+
+          <div class="flex justify-between items-center mt-4">
+            <button type="button" id="btnEliminar" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center gap-2">
+              <i class="fas fa-trash-alt"></i> Eliminar
+            </button>
+            <div class="flex gap-2">
+              <button type="button" id="btnCancelarEditar" class="text-gray-500 px-4 py-2 border rounded">Cancelar</button>
+              <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded">Guardar cambios</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar -->
+    <div id="modalConfirmar" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm text-center">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">¿Eliminar este movimiento?</h2>
+        <p class="text-sm text-gray-500 mb-6">Esta acción no se puede deshacer.</p>
+        <div class="flex justify-center gap-4">
+          <button id="cancelarConfirmacion" class="px-4 py-2 border rounded text-gray-500">Cancelar</button>
+          <button id="confirmarEliminacion" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Eliminar</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let indexAEliminar = null;
+      let renderCount = 0;
+      const totalEl = document.getElementById("total");
+      const lista = document.getElementById("lista");
+      const btnAgregar = document.getElementById("btnAgregar");
+      const modal = document.getElementById("modal");
+      const cerrarModal = document.getElementById("cerrarModal");
+      const form = document.getElementById("form");
+      const tabGastos = document.getElementById("tabGastos");
+      const tabIngresos = document.getElementById("tabIngresos");
+      const modalInicial = document.getElementById("modalInicial");
+      const inputInicial = document.getElementById("inputInicial");
+      const guardarInicial = document.getElementById("guardarInicial");
+      const ctx = document.getElementById("grafico").getContext("2d");
+
+      let movimientos = JSON.parse(localStorage.getItem("movimientos")) || [];
+      //let totalInicial = parseFloat(localStorage.getItem("totalInicial")) || null;
+      let tipoVista = "gasto";
+
+      //if (!totalInicial) modalInicial.classList.remove("hidden");
+
+      let totalInicial = localStorage.getItem("totalInicial");
+
+      console.log("totalInicial", totalInicial, typeof totalInicial);
+
+      if (totalInicial === null) {
+        modalInicial.classList.remove("hidden");
+      } else {
+        modalInicial.classList.add("hidden");
+        totalInicial = parseFloat(totalInicial);
+      }
+
+      guardarInicial.onclick = () => {
+        const valor = parseFloat(inputInicial.value);
+        if (!isNaN(valor)) {
+          localStorage.setItem("totalInicial", valor);
+          totalInicial = valor;
+          modalInicial.classList.add("hidden");
+          renderizar();
+        }
+      };
+
+      window.addEventListener("load", () => {
+        const splash = document.getElementById("splash");
+        if (splash) {
+          splash.classList.add("opacity-0");
+          //setTimeout(() => splash.remove(), 700); // mismo tiempo que el fade-out
+          setTimeout(() => {
+            splash.classList.add("opacity-0");
+            setTimeout(() => splash.remove(), 700);
+          }, 1000); // espera 1 segundo antes
+        }
+      });
+
+      const renderizar = () => {
+        renderCount++;
+        console.log("🔄 RENDER N°:", renderCount, "| Vista:", tipoVista);
+
+        const filtrados = movimientos.filter((m) => m.tipo === tipoVista);
+        lista.innerHTML = "";
+
+        let total = totalInicial;
+        const resumen = {};
+        const colores = [];
+
+        movimientos.forEach((m) => {
+          total += m.tipo === "ingreso" ? m.monto : -m.monto;
+          if (m.tipo === tipoVista) {
+            resumen[m.tema] = (resumen[m.tema] || 0) + m.monto;
+          }
+        });
+
+        // filtrados.forEach((m) => {
+        //   const li = document.createElement("li");
+        //   li.className = "bg-white rounded shadow p-3 flex justify-between items-center";
+        //   li.innerHTML = `<div><strong>${m.tema}</strong><br/><span class='text-sm text-gray-500'>${m.descripcion || ""}</span></div><div class='${
+        //     tipoVista === "gasto" ? "text-red-600" : "text-green-600"
+        //   } font-bold'>${m.monto.toLocaleString()} $</div>`;
+        //   lista.appendChild(li);
+        // });
+
+        const totalVista = filtrados.reduce((acc, m) => acc + m.monto, 0);
+
+        filtrados.forEach((m) => {
+          const porcentaje = totalVista > 0 ? ((m.monto / totalVista) * 100).toFixed(1) : 0;
+
+          const temaCapitalizado = m.tema.charAt(0).toUpperCase() + m.tema.slice(1);
+          const li = document.createElement("li");
+
+          li.className = "bg-white rounded-2xl p-4 flex justify-between items-start gap-4 border-l-4";
+          li.style.borderColor = m.color || "#666";
+          li.style.boxShadow = "rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px";
+
+          li.innerHTML = `
+              <div>
+              <span class="inline-block text-white text-sm font-semibold px-3 py-2 rounded-full mb-1"
+                      style="background-color: ${m.color || "#666"}">
+                    ${temaCapitalizado}
+              </span><br/>
+              <span class="text-sm text-gray-500">${m.descripcion || ""}</span>
+              </div>
+
+              <div class="flex items-center gap-3">
+              <div class="text-right">
+                  <div class="${tipoVista === "gasto" ? "text-red-600" : "text-green-600"} font-bold">
+                  $ ${m.monto.toLocaleString()} 
+                  </div>
+                  <div class="text-xs text-gray-500">${porcentaje}%</div>
+              </div>
+
+             <button title="Editar" class="btn-editar text-gray-400 hover:text-gray-700 text-lg" data-index="${movimientos.indexOf(m)}">
+                <i class="fas fa-pen"></i>
+              </button>
+              </div>
+          `;
+
+          lista.appendChild(li);
+        });
+
+        totalEl.textContent = `$ ${total.toLocaleString()}`;
+
+        const temas = Object.keys(resumen);
+        const valores = Object.values(resumen);
+        temas.forEach((t) => {
+          const movimiento = movimientos.find((m) => m.tema === t && m.tipo === tipoVista);
+          colores.push(movimiento?.color || "#999");
+        });
+
+        //if (!ctx || typeof Chart === "undefined") return;
+
+        if (window.chart) window.chart.destroy();
+        // window.chart = new Chart(ctx, {
+        //   type: "doughnut",
+        //   data: {
+        //     //labels: temas,
+        //     datasets: [
+        //       {
+        //         data: valores,
+        //         backgroundColor: colores,
+        //       },
+        //     ],
+        //   },
+        //   // options: { plugins: { legend: { position: "bottom" } } },
+        // });
+
+        window.chart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            //labels: temas,
+            datasets: [
+              {
+                data: valores,
+                backgroundColor: colores,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "70%",
+            plugins: {
+              legend: { position: "bottom" },
+            },
+          },
+          plugins: [
+            {
+              id: "centerText",
+              beforeDraw(chart) {
+                const { width } = chart;
+                const { height } = chart;
+                const ctx = chart.ctx;
+                ctx.restore();
+
+                const total = valores.reduce((a, b) => a + b, 0);
+                ctx.font = "bold 25px Manrope, sans-serif";
+                ctx.fillStyle = "#374151"; // gris oscuro
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(`$ ${total.toLocaleString()}`, width / 2, height / 2);
+                ctx.save();
+              },
+            },
+          ],
+        });
+      };
+
+      document.addEventListener("click", (e) => {
+        if (e.target.closest(".btn-editar")) {
+          const index = e.target.closest(".btn-editar").dataset.index;
+          const m = movimientos[index];
+
+          document.getElementById("editIndex").value = index;
+          document.getElementById("editTema").value = m.tema;
+          document.getElementById("editDescripcion").value = m.descripcion || "";
+          document.getElementById("editMonto").value = m.monto;
+
+          renderColorSelector("editColorSelector", "editColor", m.color); // primero
+          document.getElementById("editColor").value = m.color; // después
+          document.getElementById("modalEditar").classList.remove("hidden");
+        }
+      });
+      document.getElementById("btnCancelarEditar").onclick = () => {
+        document.getElementById("modalEditar").classList.add("hidden");
+      };
+
+      // btnAgregar.onclick = () => modal.classList.remove("hidden");
+      btnAgregar.onclick = () => {
+        renderColorSelector("colorSelector", "color"); // <-- esto lo agregamos recién
+        modal.classList.remove("hidden");
+      };
+      cerrarModal.onclick = () => modal.classList.add("hidden");
+
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        const monto = parseFloat(form.monto.value);
+        const tema = form.tema.value;
+        const descripcion = form.descripcion.value;
+        const color = form.color.value;
+
+        if (!isNaN(monto) && tema) {
+          movimientos.push({ tipo: tipoVista, monto, tema, descripcion, color });
+          localStorage.setItem("movimientos", JSON.stringify(movimientos));
+          form.reset();
+          modal.classList.add("hidden");
+          showToast("Movimiento agregado con éxito", "success");
+          renderizar();
+        }
+      };
+
+      document.getElementById("formEditar").onsubmit = (e) => {
+        e.preventDefault();
+        const index = parseInt(document.getElementById("editIndex").value);
+
+        movimientos[index].tema = document.getElementById("editTema").value;
+        movimientos[index].descripcion = document.getElementById("editDescripcion").value;
+        movimientos[index].monto = parseFloat(document.getElementById("editMonto").value);
+        movimientos[index].color = document.getElementById("editColor").value;
+
+        localStorage.setItem("movimientos", JSON.stringify(movimientos));
+        document.getElementById("modalEditar").classList.add("hidden");
+        showToast("Movimiento editado correctamente", "info");
+        renderizar();
+      };
+
+      document.getElementById("btnEliminar").onclick = () => {
+        const index = parseInt(document.getElementById("editIndex").value);
+        // if (confirm("¿Seguro que querés eliminar este movimiento?")) {
+        //   movimientos.splice(index, 1);
+        //   localStorage.setItem("movimientos", JSON.stringify(movimientos));
+        //   document.getElementById("modalEditar").classList.add("hidden");
+        //   renderizar();
+        // }
+        indexAEliminar = parseInt(document.getElementById("editIndex").value);
+        document.getElementById("modalConfirmar").classList.remove("hidden");
+      };
+
+      document.getElementById("cancelarConfirmacion").onclick = () => {
+        document.getElementById("modalConfirmar").classList.add("hidden");
+        indexAEliminar = null;
+      };
+
+      document.getElementById("confirmarEliminacion").onclick = () => {
+        if (indexAEliminar !== null) {
+          movimientos.splice(indexAEliminar, 1);
+          localStorage.setItem("movimientos", JSON.stringify(movimientos));
+          document.getElementById("modalEditar").classList.add("hidden");
+          document.getElementById("modalConfirmar").classList.add("hidden");
+          renderizar();
+          showToast("Movimiento eliminado", "error");
+          indexAEliminar = null;
+        }
+      };
+
+      tabGastos.onclick = () => {
+        if (tipoVista === "gasto") return;
+        tipoVista = "gasto";
+        tabGastos.classList.add("border-green-600", "text-green-600");
+        tabGastos.classList.remove("text-gray-500");
+        tabIngresos.classList.remove("border-green-600", "text-green-600");
+        tabIngresos.classList.add("text-gray-500");
+        renderizar();
+      };
+
+      tabIngresos.onclick = () => {
+        if (tipoVista === "ingreso") return;
+        tipoVista = "ingreso";
+        tabIngresos.classList.add("border-green-600", "text-green-600");
+        tabIngresos.classList.remove("text-gray-500");
+        tabGastos.classList.remove("border-green-600", "text-green-600");
+        tabGastos.classList.add("text-gray-500");
+        renderizar();
+      };
+
+      renderizar();
+
+      const activarTab = (tipo) => {
+        tipoVista = tipo;
+
+        if (tipo === "gasto") {
+          tabGastos.classList.add("bg-emerald-600", "text-white", "shadow-md");
+          tabGastos.classList.remove("text-gray-600", "hover:text-emerald-700");
+
+          tabIngresos.classList.remove("bg-emerald-600", "text-white", "shadow-md");
+          tabIngresos.classList.add("text-gray-600", "hover:text-emerald-700");
+        } else {
+          tabIngresos.classList.add("bg-emerald-600", "text-white", "shadow-md");
+          tabIngresos.classList.remove("text-gray-600", "hover:text-emerald-700");
+
+          tabGastos.classList.remove("bg-emerald-600", "text-white", "shadow-md");
+          tabGastos.classList.add("text-gray-600", "hover:text-emerald-700");
+        }
+
+        renderizar();
+      };
+
+      tabGastos.onclick = () => activarTab("gasto");
+      tabIngresos.onclick = () => activarTab("ingreso");
+
+      const COLORES_DISPONIBLES = [
+        // Amarillos
+        "#fef08a",
+        "#fde047",
+        "#facc15",
+        "#eab308",
+        "#ca8a04",
+        "#a16207",
+        "#854d0e",
+        "#713f12",
+        "#78350f",
+        "#451a03",
+        // Verdes
+        "#d9f99d",
+        "#bef264",
+        "#a3e635",
+        "#84cc16",
+        "#65a30d",
+        "#4d7c0f",
+        "#3f6212",
+        "#365314",
+        "#1a2e05",
+        "#052e16",
+        // Rojos
+        "#fecaca",
+        "#fca5a5",
+        "#f87171",
+        "#ef4444",
+        "#dc2626",
+        "#b91c1c",
+        "#991b1b",
+        "#7f1d1d",
+        "#450a0a",
+        "#1c0c0c",
+        // Azules
+        "#dbeafe",
+        "#bfdbfe",
+        "#93c5fd",
+        "#60a5fa",
+        "#3b82f6",
+        "#2563eb",
+        "#1d4ed8",
+        "#1e40af",
+        "#1e3a8a",
+        "#172554",
+        "#0c4a6e",
+        "#075985",
+        "#0369a1",
+        "#0284c7",
+        "#0ea5e9",
+        "#38bdf8",
+        "#7dd3fc",
+        "#bae6fd",
+        "#e0f2fe",
+        "#f0f9ff",
+        // Naranjas
+        "#ffedd5",
+        "#fed7aa",
+        "#fdba74",
+        "#fb923c",
+        "#f97316",
+        "#ea580c",
+        "#c2410c",
+        "#9a3412",
+        "#7c2d12",
+        "#431407",
+        // Grises (de blanco a negro)
+        "#f9fafb",
+        "#f3f4f6",
+        "#e5e7eb",
+        "#d1d5db",
+        "#9ca3af",
+        "#6b7280",
+        "#4b5563",
+        "#374151",
+        "#1f2937",
+        "#111827",
+      ];
+
+      function renderColorSelector(containerId, inputId, selectedColor = "#facc15") {
+        const container = document.getElementById(containerId);
+        const input = document.getElementById(inputId);
+        container.innerHTML = "";
+
+        COLORES_DISPONIBLES.forEach((color) => {
+          const div = document.createElement("div");
+          div.className = `w-6 h-6 rounded-full cursor-pointer border transition-all`;
+          div.style.backgroundColor = color;
+          if (color === selectedColor) {
+            div.classList.add("ring-2", "ring-emerald-500");
+          }
+
+          div.onclick = () => {
+            input.value = color;
+            [...container.children].forEach((c) => c.classList.remove("ring-2", "ring-emerald-500"));
+            div.classList.add("ring-2", "ring-emerald-500");
+          };
+
+          container.appendChild(div);
+        });
+      }
+
+      function showToast(mensaje, tipo = "info") {
+        const toast = document.getElementById("toast");
+        toast.textContent = mensaje;
+
+        // Cambia color según tipo
+        toast.classList.remove("bg-gray-800", "bg-green-600", "bg-red-600");
+        if (tipo === "success") toast.classList.add("bg-green-600");
+        else if (tipo === "error") toast.classList.add("bg-red-600");
+        else toast.classList.add("bg-cyan-500");
+
+        // Mostrar
+        toast.classList.remove("opacity-0");
+        toast.classList.add("opacity-100");
+
+        setTimeout(() => {
+          toast.classList.remove("opacity-100");
+          toast.classList.add("opacity-0");
+        }, 3000);
+      }
+    </script>
+    <div
+      id="toast"
+      class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm px-4 py-2 rounded-lg shadow-lg opacity-0 pointer-events-none transition-all duration-500 z-50 whitespace-nowrap text-center max-w-[90vw]"
+    ></div>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("service-worker.js");
+      }
+    </script>
+
+    <div id="splash" class="fixed inset-0 bg-[#046c4e] flex items-center justify-center z-50 transition-opacity duration-700">
+      <img src="icon-512.png" alt="Logo" class="w-24 h-24 animate-bounce-spin" />
+    </div>
+  </body>
+</html>

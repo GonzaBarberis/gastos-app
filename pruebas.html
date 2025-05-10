@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Control de Gastos</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Manrope", sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 text-gray-800">
+    <div class="bg-green-600 text-white p-4 shadow flex justify-between items-center">
+      <h1 class="text-xl font-bold"><i class="fas fa-wallet mr-2"></i>Total</h1>
+      <span class="text-3xl font-bold" id="total">$ 0</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white flex justify-around border-b">
+      <button id="tabGastos" class="py-3 px-4 font-semibold border-b-2 border-green-600 text-green-600">
+        <i class="fas fa-arrow-down mr-2"></i>GASTOS
+      </button>
+      <button id="tabIngresos" class="py-3 px-4 text-gray-500 font-semibold"><i class="fas fa-arrow-up mr-2"></i>INGRESOS</button>
+    </div>
+
+    <!-- Contenido -->
+    <div class="p-4">
+      <div class="text-sm text-gray-500 mb-2 text-center" id="rangoFecha">Semana actual</div>
+      <canvas id="grafico" class="mb-6"></canvas>
+      <ul id="lista" class="space-y-2"></ul>
+    </div>
+
+    <!-- Botón flotante -->
+    <button id="btnAgregar" class="fixed bottom-6 right-6 bg-yellow-400 text-black w-14 h-14 rounded-full text-3xl shadow-lg">
+      <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Modal para agregar -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
+      <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4">Nuevo movimiento</h2>
+        <form id="form">
+          <input type="number" id="monto" placeholder="Monto ($)" class="w-full border rounded px-3 py-2 mb-3" required />
+          <input type="text" id="tema" placeholder="Tema (ej: Placa de video)" class="w-full border rounded px-3 py-2 mb-3" required />
+          <input type="text" id="descripcion" placeholder="Descripción (opcional)" class="w-full border rounded px-3 py-2 mb-3" />
+          <button class="bg-green-600 text-white w-full py-2 rounded" type="submit">Guardar</button>
+          <button class="text-red-500 w-full mt-2" type="button" id="cerrarModal">Cancelar</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de monto inicial -->
+    <div id="modalInicial" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
+        <h2 class="text-xl font-bold mb-4 text-center">¿Con cuánto arrancás?</h2>
+        <input id="inputInicial" type="number" placeholder="Ej: 50000" class="w-full border rounded px-3 py-2 mb-3" />
+        <button id="guardarInicial" class="bg-green-600 text-white w-full py-2 rounded">Guardar</button>
+      </div>
+    </div>
+
+    <script>
+      const totalEl = document.getElementById("total");
+      const lista = document.getElementById("lista");
+      const btnAgregar = document.getElementById("btnAgregar");
+      const modal = document.getElementById("modal");
+      const cerrarModal = document.getElementById("cerrarModal");
+      const form = document.getElementById("form");
+      const tabGastos = document.getElementById("tabGastos");
+      const tabIngresos = document.getElementById("tabIngresos");
+      const modalInicial = document.getElementById("modalInicial");
+      const inputInicial = document.getElementById("inputInicial");
+      const guardarInicial = document.getElementById("guardarInicial");
+      const ctx = document.getElementById("grafico").getContext("2d");
+
+      let movimientos = JSON.parse(localStorage.getItem("movimientos")) || [];
+      let totalInicial = parseFloat(localStorage.getItem("totalInicial")) || null;
+      let tipoVista = "gasto";
+
+      if (!totalInicial) modalInicial.classList.remove("hidden");
+
+      guardarInicial.onclick = () => {
+        const valor = parseFloat(inputInicial.value);
+        if (!isNaN(valor)) {
+          localStorage.setItem("totalInicial", valor);
+          totalInicial = valor;
+          modalInicial.classList.add("hidden");
+          renderizar();
+        }
+      };
+
+      const renderizar = () => {
+        const filtrados = movimientos.filter((m) => m.tipo === tipoVista);
+        lista.innerHTML = "";
+
+        let total = totalInicial;
+        const resumen = {};
+
+        movimientos.forEach((m) => {
+          total += m.tipo === "ingreso" ? m.monto : -m.monto;
+          if (m.tipo === tipoVista) {
+            resumen[m.tema] = (resumen[m.tema] || 0) + m.monto;
+          }
+        });
+
+        filtrados.forEach((m) => {
+          const li = document.createElement("li");
+          li.className = "bg-white rounded shadow p-3 flex justify-between items-center";
+          li.innerHTML = `<div><strong>${m.tema}</strong><br/><span class='text-sm text-gray-500'>${m.descripcion || ""}</span></div><div class='${
+            tipoVista === "gasto" ? "text-red-600" : "text-green-600"
+          } font-bold'>${m.monto.toLocaleString()} $</div>`;
+          lista.appendChild(li);
+        });
+
+        totalEl.textContent = `$ ${total.toLocaleString()}`;
+
+        const temas = Object.keys(resumen);
+        const valores = Object.values(resumen);
+
+        if (window.chart) window.chart.destroy();
+        window.chart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: temas,
+            datasets: [
+              {
+                data: valores,
+                backgroundColor: ["#facc15", "#ef4444", "#10b981", "#64748b", "#a855f7"],
+              },
+            ],
+          },
+          options: { plugins: { legend: { position: "bottom" } } },
+        });
+      };
+
+      btnAgregar.onclick = () => modal.classList.remove("hidden");
+      cerrarModal.onclick = () => modal.classList.add("hidden");
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        const monto = parseFloat(form.monto.value);
+        const tema = form.tema.value;
+        const descripcion = form.descripcion.value;
+        if (!isNaN(monto) && tema) {
+          movimientos.push({ tipo: tipoVista, monto, tema, descripcion });
+          localStorage.setItem("movimientos", JSON.stringify(movimientos));
+          form.reset();
+          modal.classList.add("hidden");
+          renderizar();
+        }
+      };
+
+      tabGastos.onclick = () => {
+        tipoVista = "gasto";
+        tabGastos.classList.add("border-green-600", "text-green-600");
+        tabIngresos.classList.remove("border-green-600", "text-green-600");
+        tabIngresos.classList.add("text-gray-500");
+        renderizar();
+      };
+
+      tabIngresos.onclick = () => {
+        tipoVista = "ingreso";
+        tabIngresos.classList.add("border-green-600", "text-green-600");
+        tabGastos.classList.remove("border-green-600", "text-green-600");
+        tabGastos.classList.add("text-gray-500");
+        renderizar();
+      };
+
+      renderizar();
+    </script>
+  </body>
+</html>
