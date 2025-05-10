@@ -681,16 +681,38 @@
           toast.classList.add("opacity-0");
         }, 3000);
       }
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("service-worker.js").then((reg) => {
+          reg.onupdatefound = () => {
+            const newWorker = reg.installing;
+            newWorker.onstatechange = () => {
+              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                showToast("Nueva versión disponible. Tocá para actualizar", "info");
+
+                const toast = document.getElementById("toast");
+                toast.onclick = () => {
+                  newWorker.postMessage({ action: "skipWaiting" });
+                  window.location.reload();
+                };
+              }
+            };
+          };
+        });
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (!refreshing) {
+            window.location.reload();
+            refreshing = true;
+          }
+        });
+      }
     </script>
     <div
       id="toast"
       class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm px-4 py-2 rounded-lg shadow-lg opacity-0 pointer-events-none transition-all duration-500 z-50 whitespace-nowrap text-center max-w-[90vw]"
     ></div>
-    <script>
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("service-worker.js");
-      }
-    </script>
 
     <div id="splash" class="fixed inset-0 bg-[#006240] flex items-center justify-center z-50 transition-opacity duration-700">
       <img src="icon-512.png" alt="Logo" class="w-24 h-24 animate-bounce-spin" />
