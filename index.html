@@ -301,6 +301,9 @@
         console.log("🔄 RENDER N°:", renderCount, "| Vista:", tipoVista);
 
         const filtrados = movimientos.filter((m) => m.tipo === tipoVista);
+
+        filtrados.sort((a, b) => b.monto - a.monto);
+
         lista.innerHTML = "";
 
         let total = totalInicial;
@@ -427,6 +430,8 @@
           ],
         });
       };
+
+      renderizar();
 
       document.addEventListener("click", (e) => {
         if (e.target.closest(".btn-editar")) {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "app-cache-v4"; // ⬅️ Subí este número cada vez que subas cambios
+const CACHE_NAME = "app-cache-v5"; // ⬅️ Subí este número cada vez que subas cambios
 
 const ASSETS_TO_CACHE = ["index.html", "manifest.json", "icon-192.png", "icon-512.png", "service-worker.js"];
 
