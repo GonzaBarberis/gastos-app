@@ -94,6 +94,13 @@
         </button>
       </div>
     </div>
+
+    <div class="flex justify-center items-center gap-4 text-emerald-700 font-semibold text-sm mb-1 mt-2 select-none">
+      <button id="mesAnterior" class="text-xl px-2 hover:text-emerald-900">◀</button>
+      <span id="mesActual">AGO 2025</span>
+      <button id="mesSiguiente" class="text-xl px-2 hover:text-emerald-900">▶</button>
+    </div>
+
     <!-- Contenido -->
     <!-- <div class="p-4">
       <div class="bg-white shadow rounded-xl p-4 max-w-sm mx-auto mb-6">
@@ -110,6 +117,7 @@
         style="box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px"
       >
         <div class="absolute top-2 left-3 text-xs text-gray-400">Últimos movimientos</div>
+
         <button
           id="btnAgregar"
           class="absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 transition-colors text-white w-14 h-14 rounded-full text-xl shadow-md flex items-center justify-center"
@@ -121,7 +129,7 @@
       </div>
 
       <!-- Lista con scroll -->
-      <ul id="lista" class="space-y-3 max-w-sm mx-auto overflow-y-auto px-1" style="max-height: 350px"></ul>
+      <ul id="lista" class="space-y-3 max-w-sm mx-auto overflow-y-auto px-1" style="max-height: 320px"></ul>
     </div>
 
     <!-- Botón flotante -->
@@ -139,12 +147,16 @@
         <form id="form">
           <label class="block text-sm font-medium mb-1">Monto</label>
           <input
-            type="number"
+            type="tel"
+            inputmode="decimal"
             id="monto"
             placeholder="Monto ($)"
             class="w-full border rounded px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             required
           />
+
+          <label class="block text-sm font-medium mb-1">Fecha</label>
+          <input type="date" id="fecha" class="w-full border rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
 
           <label class="block text-sm font-medium mb-1">Tema</label>
           <input
@@ -211,6 +223,9 @@
           <label class="block text-sm font-medium mb-1">Monto</label>
           <input type="number" id="editMonto" class="w-full border rounded px-3 py-2 mb-3" required />
 
+          <label class="block text-sm font-medium mb-1">Fecha</label>
+          <input type="date" id="editFecha" class="w-full border rounded px-3 py-2 mb-3" />
+
           <label class="block text-sm font-medium mb-1">Color</label>
           <!-- <input type="color" id="editColor" class="w-full h-10 rounded mb-4 border" /> -->
           <div class="grid grid-cols-10 gap-2 mb-4" id="editColorSelector"></div>
@@ -267,6 +282,29 @@
 
       console.log("totalInicial", totalInicial, typeof totalInicial);
 
+      let mesActual = new Date();
+
+      actualizarMesTexto();
+
+      document.getElementById("mesAnterior").onclick = () => {
+        mesActual.setMonth(mesActual.getMonth() - 1);
+        actualizarMesTexto();
+        renderizar();
+      };
+
+      document.getElementById("mesSiguiente").onclick = () => {
+        mesActual.setMonth(mesActual.getMonth() + 1);
+        actualizarMesTexto();
+        renderizar();
+      };
+
+      function actualizarMesTexto() {
+        const meses = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+        const mes = meses[mesActual.getMonth()];
+        const año = mesActual.getFullYear();
+        document.getElementById("mesActual").textContent = `${mes} ${año}`;
+      }
+
       if (totalInicial === null) {
         modalInicial.classList.remove("hidden");
       } else {
@@ -300,7 +338,21 @@
         renderCount++;
         console.log("🔄 RENDER N°:", renderCount, "| Vista:", tipoVista);
 
-        const filtrados = movimientos.filter((m) => m.tipo === tipoVista);
+        // const filtrados = movimientos.filter((m) => m.tipo === tipoVista);
+
+        const año = mesActual.getFullYear();
+        const mes = mesActual.getMonth(); // 0-11
+
+        const filtrados = movimientos.filter((m) => {
+          if (!m.fecha) {
+            // Mostrar los sin fecha SOLO si estamos en el mes actual
+            const hoy = new Date();
+            return hoy.getFullYear() === mesActual.getFullYear() && hoy.getMonth() === mesActual.getMonth() && m.tipo === tipoVista;
+          }
+
+          const f = new Date(m.fecha);
+          return f.getFullYear() === mesActual.getFullYear() && f.getMonth() === mesActual.getMonth() && m.tipo === tipoVista;
+        });
 
         filtrados.sort((a, b) => b.monto - a.monto);
 
@@ -312,8 +364,12 @@
 
         movimientos.forEach((m) => {
           total += m.tipo === "ingreso" ? m.monto : -m.monto;
+
           if (m.tipo === tipoVista) {
-            resumen[m.tema] = (resumen[m.tema] || 0) + m.monto;
+            const f = new Date(m.fecha || "");
+            if (f.getFullYear() === año && f.getMonth() === mes) {
+              resumen[m.tema] = (resumen[m.tema] || 0) + m.monto;
+            }
           }
         });
 
@@ -443,8 +499,12 @@
           document.getElementById("editDescripcion").value = m.descripcion || "";
           document.getElementById("editMonto").value = m.monto;
 
-          renderColorSelector("editColorSelector", "editColor", m.color); // primero
-          document.getElementById("editColor").value = m.color; // después
+          // ✅ ACA agregás la fecha
+          document.getElementById("editFecha").value = m.fecha || new Date().toISOString().slice(0, 10);
+
+          renderColorSelector("editColorSelector", "editColor", m.color);
+          document.getElementById("editColor").value = m.color;
+
           document.getElementById("modalEditar").classList.remove("hidden");
         }
       });
@@ -455,6 +515,7 @@
       // btnAgregar.onclick = () => modal.classList.remove("hidden");
       btnAgregar.onclick = () => {
         renderColorSelector("colorSelector", "color"); // <-- esto lo agregamos recién
+        document.getElementById("fecha").value = new Date().toISOString().slice(0, 10);
         modal.classList.remove("hidden");
       };
       cerrarModal.onclick = () => modal.classList.add("hidden");
@@ -465,9 +526,10 @@
         const tema = form.tema.value;
         const descripcion = form.descripcion.value;
         const color = form.color.value;
+        const hoy = new Date().toISOString().slice(0, 10); // fecha del gasto
 
         if (!isNaN(monto) && tema) {
-          movimientos.push({ tipo: tipoVista, monto, tema, descripcion, color });
+          movimientos.push({ tipo: tipoVista, monto, tema, descripcion, color, fecha: hoy });
           localStorage.setItem("movimientos", JSON.stringify(movimientos));
           form.reset();
           modal.classList.add("hidden");
@@ -484,6 +546,7 @@
         movimientos[index].descripcion = document.getElementById("editDescripcion").value;
         movimientos[index].monto = parseFloat(document.getElementById("editMonto").value);
         movimientos[index].color = document.getElementById("editColor").value;
+        movimientos[index].fecha = document.getElementById("editFecha").value; // ✅ AHORA SÍ
 
         localStorage.setItem("movimientos", JSON.stringify(movimientos));
         document.getElementById("modalEditar").classList.add("hidden");
