@@ -394,27 +394,51 @@
           li.style.borderColor = m.color || "#666";
           li.style.boxShadow = "rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px";
 
+          // li.innerHTML = `
+          //     <div>
+          //     <span class="inline-block text-white text-sm font-semibold px-3 py-2 rounded-full mb-1"
+          //             style="background-color: ${m.color || "#666"}">
+          //           ${temaCapitalizado}
+          //     </span><br/>
+          //     <span class="text-sm text-gray-500">${m.descripcion || ""}</span>
+          //     </div>
+
+          //     <div class="flex items-center gap-3">
+          //     <div class="text-right">
+          //         <div class="${tipoVista === "gasto" ? "text-red-600" : "text-green-600"} font-bold">
+          //         $ ${m.monto.toLocaleString()}
+          //         </div>
+          //         <div class="text-xs text-gray-500">${porcentaje}%</div>
+          //     </div>
+
+          //    <button title="Editar" class="btn-editar text-gray-400 hover:text-gray-700 text-lg" data-index="${movimientos.indexOf(m)}">
+          //       <i class="fas fa-pen"></i>
+          //     </button>
+          //     </div>
+          // `;
+
           li.innerHTML = `
-              <div>
-              <span class="inline-block text-white text-sm font-semibold px-3 py-2 rounded-full mb-1"
-                      style="background-color: ${m.color || "#666"}">
-                    ${temaCapitalizado}
-              </span><br/>
-              <span class="text-sm text-gray-500">${m.descripcion || ""}</span>
-              </div>
+            <div class="flex flex-col justify-between">
+              <span class="inline-block text-white text-sm font-semibold px-3 py-1 rounded-full mb-1"
+                    style="background-color: ${m.color || "#666"}">
+                ${temaCapitalizado}
+              </span>
+              ${m.descripcion ? `<span class="text-sm text-gray-600 leading-tight mb-1">${m.descripcion}</span>` : ""}
+              ${m.fecha ? `<span class="text-xs text-gray-400">${new Date(m.fecha).toLocaleDateString("es-AR")}</span>` : ""}
+            </div>
 
-              <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3">
               <div class="text-right">
-                  <div class="${tipoVista === "gasto" ? "text-red-600" : "text-green-600"} font-bold">
-                  $ ${m.monto.toLocaleString()} 
-                  </div>
-                  <div class="text-xs text-gray-500">${porcentaje}%</div>
+                <div class="${tipoVista === "gasto" ? "text-red-600" : "text-green-600"} font-bold">
+                  $ ${m.monto.toLocaleString()}
+                </div>
+                <div class="text-xs text-gray-500">${porcentaje}%</div>
               </div>
 
-             <button title="Editar" class="btn-editar text-gray-400 hover:text-gray-700 text-lg" data-index="${movimientos.indexOf(m)}">
+              <button title="Editar" class="btn-editar text-gray-400 hover:text-gray-700 text-lg" data-index="${movimientos.indexOf(m)}">
                 <i class="fas fa-pen"></i>
               </button>
-              </div>
+            </div>
           `;
 
           lista.appendChild(li);
