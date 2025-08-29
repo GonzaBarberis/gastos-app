@@ -61,6 +61,7 @@
           <i class="fas fa-sack-dollar text-white text-xl"></i>
         </div>
       </div>
+
       <div class="absolute right-2 bottom-2 text-white text-[6rem] opacity-10 pointer-events-none select-none">
         <i class="fas fa-coins"></i>
       </div>
@@ -117,7 +118,13 @@
         style="box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px"
       >
         <div class="absolute top-2 left-3 text-xs text-gray-400">Últimos movimientos</div>
-
+        <button
+          onclick="copiarBackup()"
+          class="absolute bottom-3 left-3 bg-red-800 transition-colors text-white w-14 h-14 rounded-full text-xl shadow-md flex items-center justify-center"
+          title="Agregar"
+        >
+          <i class="fas fa-file-export"></i>
+        </button>
         <button
           id="btnAgregar"
           class="absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 transition-colors text-white w-14 h-14 rounded-full text-xl shadow-md flex items-center justify-center"
@@ -799,6 +806,17 @@
             refreshing = true;
           }
         });
+      }
+
+      function copiarBackup() {
+        const data = JSON.stringify(localStorage, null, 2);
+        navigator.clipboard
+          .writeText(data)
+          .then(() => alert("✅ Copiado al portapapeles"))
+          .catch((err) => {
+            alert("❌ No se pudo copiar. Probá en otro navegador.");
+            console.error(err);
+          });
       }
     </script>
     <div
