@@ -14,9 +14,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet" />
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
       body {
         font-family: "Manrope", sans-serif;
@@ -47,37 +44,38 @@
         animation: bounce-spin 2s ease-out forwards;
       }
     </style>
-
-    <script>
-      const SUPABASE_URL = "https://ksulfxngebgwfdmokxei.supabase.co";
-      const SUPABASE_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdWxmeG5nZWJnd2ZkbW9reGVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5NTU3ODgsImV4cCI6MjA4MjUzMTc4OH0.KhAACT3bdfrvSvKnhp8L-4l_Du5ztU5PYG8hAfx9XDo";
-
-      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    </script>
   </head>
   <body class="bg-gray-100 text-gray-800">
     <!-- Header Total -->
- 
-    <div class="relative overflow-hidden bg-gradient-to-r from-emerald-700 to-emerald-600 text-white rounded-b-[2.5rem] shadow-lg p-7 mb-5">
+    <!-- <div class="bg-emerald-700 text-white p-4 shadow flex justify-between items-center">
+      <h1 class="text-xl font-semibold tracking-tight"><i class="fas fa-money-bill-alt mr-2"></i>Balance</h1>
+      <span class="text-3xl font-extrabold" id="total">$ 0</span>
+    </div> -->
+    <div class="relative overflow-hidden bg-gradient-to-r from-emerald-700 to-emerald-600 text-white rounded-b-3xl shadow-md p-6 mb-4">
       <div class="flex justify-between items-center relative z-10">
         <div>
-          <h1 class="text-xs font-semibold uppercase tracking-widest opacity-80">Balance actual</h1>
-          <p id="total" class="text-4xl font-extrabold mt-2 tracking-tight">$ 0</p>
+          <h1 class="text-lg font-semibold uppercase tracking-wide opacity-90">Balance actual</h1>
+          <p class="text-3xl font-extrabold mt-1" id="total">$ 0</p>
         </div>
-
-        <div class="w-14 h-14 flex items-center justify-center rounded-full bg-white bg-opacity-15 backdrop-blur-sm shadow-inner">
-          <i class="fas fa-sack-dollar text-2xl"></i>
+        <div class="bg-white bg-opacity-20 rounded-full p-2 px-3">
+          <i class="fas fa-sack-dollar text-white text-xl"></i>
         </div>
       </div>
 
-      <!-- elemento decorativo -->
-      <div class="absolute -right-6 -bottom-8 text-white text-[7rem] opacity-[0.08] pointer-events-none select-none">
+      <div class="absolute right-2 bottom-2 text-white text-[6rem] opacity-10 pointer-events-none select-none">
         <i class="fas fa-coins"></i>
       </div>
     </div>
 
-   
+    <!-- Tabs -->
+    <!-- <div class="bg-white flex justify-around border-b">
+      <button id="tabGastos" class="py-3 px-4 font-semibold border-b-2 border-green-600 text-green-600 flex items-center gap-2">
+        <i class="fas fa-arrow-down text-sm"></i> GASTOS
+      </button>
+      <button id="tabIngresos" class="py-3 px-4 font-semibold border-b-2 border-gray-300 text-gray-500 flex items-center gap-2">
+        <i class="fas fa-arrow-up text-sm"></i> INGRESOS
+      </button>
+    </div> -->
 
     <div class="bg-gray-100 px-4">
       <div class="flex bg-white rounded-full shadow-inner p-1 max-w-xs mx-auto">
@@ -102,8 +100,6 @@
       <button id="mesAnterior" class="text-xl px-2 hover:text-emerald-900"><i class="fas fa-caret-left"></i></button>
       <span id="mesActual">AGO 2025</span>
       <button id="mesSiguiente" class="text-xl px-2 hover:text-emerald-900"><i class="fas fa-caret-right"></i></button>
-
-      <button id="btnOrden" class="text-xs px-3 py-1 border rounded-full text-emerald-700 hover:bg-emerald-100 transition">Orden: Monto ↓</button>
     </div>
 
     <!-- Contenido -->
@@ -115,64 +111,33 @@
       <ul id="lista" class="space-y-3 max-w-sm mx-auto overflow-y-auto" style="max-height: 310px"></ul>
     </div> -->
 
-    <div class="px-4 py-5 bg-gray-50">
-  <div
-    class="relative max-w-sm mx-auto bg-white rounded-2xl px-5 py-4 mb-5"
-    style="box-shadow: 0 8px 20px rgba(0,0,0,0.08)"
-  >
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-3">
-      <span class="text-xs uppercase tracking-wide text-gray-400">
-        Últimos movimientos
-      </span>
-
-      <button
-        onclick="copiarBackup()"
-        class="text-gray-400 hover:text-gray-700 transition"
-        title="Exportar"
+    <div class="px-4 py-6 bg-gray-50 min-h-[calc(100vh-150px)]">
+      <!-- Gráfico en tarjeta elegante -->
+      <div
+        class="relative max-w-sm mx-auto bg-white rounded-2xl p-5 mb-6 flex flex-col items-center"
+        style="box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px"
       >
-        <i class="fas fa-file-export"></i>
-      </button>
-    </div>
-
-    <!-- Contenido horizontal -->
-    <div class="flex items-center gap-4">
-      <!-- Gráfico chico -->
-      <div class="w-28 h-28 flex-shrink-0">
-        <canvas id="grafico"></canvas>
-      </div>
-
-      <!-- Info -->
-      <div class="flex-1">
-        <div class="text-xs text-gray-400 mb-1">
-          Total del período
-        </div>
-        <div
-          id="totalGrafico"
-          class="text-3xl font-extrabold text-gray-800 tracking-tight"
+        <div class="absolute top-2 left-3 text-xs text-gray-400">Últimos movimientos</div>
+        <button
+          onclick="copiarBackup()"
+          class="absolute bottom-3 left-3 bg-red-800 transition-colors text-white w-14 h-14 rounded-full text-xl shadow-md flex items-center justify-center"
+          title="Agregar"
         >
-          $ 0
-        </div>
-
+          <i class="fas fa-file-export"></i>
+        </button>
         <button
           id="btnAgregar"
-          class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-900 transition"
+          class="absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 transition-colors text-white w-14 h-14 rounded-full text-xl shadow-md flex items-center justify-center"
+          title="Agregar"
         >
-          <i class="fas fa-plus-circle"></i>
-          Nuevo movimiento
+          <i class="fas fa-plus"></i>
         </button>
+        <canvas id="grafico" class="w-full h-52"></canvas>
       </div>
+
+      <!-- Lista con scroll -->
+      <ul id="lista" class="space-y-3 max-w-sm mx-auto overflow-y-auto px-1" style="max-height: 320px"></ul>
     </div>
-  </div>
-
-  <!-- Lista -->
-  <ul
-    id="lista"
-    class="space-y-3 max-w-sm mx-auto overflow-y-auto px-1"
-    style="max-height: 320px"
-  ></ul>
-</div>
-
 
     <!-- Botón flotante -->
     <!-- <button
@@ -254,8 +219,7 @@
       <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
         <h2 class="text-xl font-bold mb-4">Editar movimiento</h2>
         <form id="formEditar">
-          <!-- <input type="hidden" id="editIndex" /> -->
-          <input type="hidden" id="editId" />
+          <input type="hidden" id="editIndex" />
 
           <label class="block text-sm font-medium mb-1">Tema</label>
           <input type="text" id="editTema" class="w-full border rounded px-3 py-2 mb-3" required />
@@ -315,35 +279,8 @@
       const guardarInicial = document.getElementById("guardarInicial");
       const ctx = document.getElementById("grafico").getContext("2d");
 
-      let modoOrden = "monto"; // "monto" | "fecha"
-
-      document.getElementById("btnOrden").onclick = () => {
-        modoOrden = modoOrden === "monto" ? "fecha" : "monto";
-
-        document.getElementById("btnOrden").textContent = modoOrden === "monto" ? "Orden: Monto ↓" : "Orden: Fecha ↓";
-
-        renderizar();
-      };
-
-      //let movimientos = JSON.parse(localStorage.getItem("movimientos")) || [];
+      let movimientos = JSON.parse(localStorage.getItem("movimientos")) || [];
       //let totalInicial = parseFloat(localStorage.getItem("totalInicial")) || null;
-
-      let movimientos = [];
-
-      async function cargarMovimientos() {
-        const { data, error } = await supabaseClient.from("movimientos").select("*").order("fecha", { ascending: true });
-
-        if (error) {
-          console.error("Error cargando movimientos:", error);
-          return;
-        }
-
-        movimientos = data;
-        renderizar();
-      }
-
-      cargarMovimientos();
-
       let tipoVista = "gasto";
 
       //if (!totalInicial) modalInicial.classList.remove("hidden");
@@ -405,8 +342,8 @@
       });
 
       const renderizar = () => {
-        //renderCount++;
-        //console.log("🔄 RENDER N°:", renderCount, "| Vista:", tipoVista);
+        renderCount++;
+        console.log("🔄 RENDER N°:", renderCount, "| Vista:", tipoVista);
 
         // const filtrados = movimientos.filter((m) => m.tipo === tipoVista);
 
@@ -424,17 +361,11 @@
           return f.getFullYear() === mesActual.getFullYear() && f.getMonth() === mesActual.getMonth() && m.tipo === tipoVista;
         });
 
-        // filtrados.sort((a, b) => b.monto - a.monto);
-
-        if (modoOrden === "monto") {
-          filtrados.sort((a, b) => Number(b.monto) - Number(a.monto));
-        } else {
-          filtrados.sort((a, b) => b.fecha.localeCompare(a.fecha));
-        }
+        filtrados.sort((a, b) => b.monto - a.monto);
 
         lista.innerHTML = "";
 
-        let total = totalInicial ?? 0;
+        let total = totalInicial;
         const resumen = {};
         const colores = [];
 
@@ -458,9 +389,7 @@
         //   lista.appendChild(li);
         // });
 
-        //const totalVista = filtrados.reduce((acc, m) => acc + m.monto, 0);
-
-        const totalVista = filtrados.reduce((acc, m) => acc + Number(m.monto), 0);
+        const totalVista = filtrados.reduce((acc, m) => acc + m.monto, 0);
 
         filtrados.forEach((m) => {
           const porcentaje = totalVista > 0 ? ((m.monto / totalVista) * 100).toFixed(1) : 0;
@@ -502,8 +431,7 @@
                 ${temaCapitalizado}
               </span>
               ${m.descripcion ? `<span class="text-sm text-gray-600 leading-tight mb-1">${m.descripcion}</span>` : ""}
-             ${m.fecha ? `<span class="text-xs text-gray-400">${m.fecha.split("-").reverse().join("/")}</span>` : ""}
-
+              ${m.fecha ? `<span class="text-xs text-gray-400">${new Date(m.fecha).toLocaleDateString("es-AR")}</span>` : ""}
             </div>
 
             <div class="flex items-center gap-3">
@@ -527,12 +455,6 @@
 
         const temas = Object.keys(resumen);
         const valores = Object.values(resumen);
-
-        const totalPeriodo = valores.reduce(
-  (acc, v) => acc + Number(v),
-  0
-);
-        document.getElementById("totalGrafico").textContent = `$ ${totalPeriodo.toLocaleString()}`;
         temas.forEach((t) => {
           const movimiento = movimientos.find((m) => m.tema === t && m.tipo === tipoVista);
           colores.push(movimiento?.color || "#999");
@@ -557,7 +479,6 @@
 
         window.chart = new Chart(ctx, {
           type: "doughnut",
-          
           data: {
             //labels: temas,
             datasets: [
@@ -575,25 +496,25 @@
               legend: { position: "bottom" },
             },
           },
-          // plugins: [
-          //   {
-          //     id: "centerText",
-          //     beforeDraw(chart) {
-          //       const { width } = chart;
-          //       const { height } = chart;
-          //       const ctx = chart.ctx;
-          //       ctx.restore();
+          plugins: [
+            {
+              id: "centerText",
+              beforeDraw(chart) {
+                const { width } = chart;
+                const { height } = chart;
+                const ctx = chart.ctx;
+                ctx.restore();
 
-          //       const total = valores.reduce((a, b) => a + b, 0);
-          //       ctx.font = "bold 25px Manrope, sans-serif";
-          //       ctx.fillStyle = "#374151"; // gris oscuro
-          //       ctx.textAlign = "center";
-          //       ctx.textBaseline = "middle";
-          //       ctx.fillText(`$ ${total.toLocaleString()}`, width / 2, height / 2);
-          //       ctx.save();
-          //     },
-          //   },
-          // ],
+                const total = valores.reduce((a, b) => a + b, 0);
+                ctx.font = "bold 25px Manrope, sans-serif";
+                ctx.fillStyle = "#374151"; // gris oscuro
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(`$ ${total.toLocaleString()}`, width / 2, height / 2);
+                ctx.save();
+              },
+            },
+          ],
         });
       };
 
@@ -604,9 +525,7 @@
           const index = e.target.closest(".btn-editar").dataset.index;
           const m = movimientos[index];
 
-          document.getElementById("editId").value = m.id;
-
-          //document.getElementById("editIndex").value = index;
+          document.getElementById("editIndex").value = index;
           document.getElementById("editTema").value = m.tema;
           document.getElementById("editDescripcion").value = m.descripcion || "";
           document.getElementById("editMonto").value = m.monto;
@@ -620,7 +539,6 @@
           document.getElementById("modalEditar").classList.remove("hidden");
         }
       });
-
       document.getElementById("btnCancelarEditar").onclick = () => {
         document.getElementById("modalEditar").classList.add("hidden");
       };
@@ -633,93 +551,49 @@
       };
       cerrarModal.onclick = () => modal.classList.add("hidden");
 
-      form.onsubmit = async (e) => {
+      form.onsubmit = (e) => {
         e.preventDefault();
-
         const monto = parseFloat(form.monto.value);
         const tema = form.tema.value;
         const descripcion = form.descripcion.value;
         const color = form.color.value;
-        const fecha = form.fecha.value;
-        const hoy = new Date().toISOString().slice(0, 10);
+        const hoy = new Date().toISOString().slice(0, 10); // fecha del gasto
 
         if (!isNaN(monto) && tema) {
-          const { error } = await supabaseClient.from("movimientos").insert([
-            {
-              tipo: tipoVista,
-              monto,
-              tema,
-              descripcion,
-              color,
-              fecha: fecha,
-            },
-          ]);
-
-          if (error) {
-            console.error(error);
-            showToast("Error guardando movimiento", "error");
-            return;
-          }
-
+          movimientos.push({ tipo: tipoVista, monto, tema, descripcion, color, fecha: hoy });
+          localStorage.setItem("movimientos", JSON.stringify(movimientos));
           form.reset();
           modal.classList.add("hidden");
           showToast("Movimiento agregado con éxito", "success");
-
-          await cargarMovimientos(); // 🔄 refresca desde BD
+          renderizar();
         }
       };
 
-      // document.getElementById("formEditar").onsubmit = (e) => {
-      //   e.preventDefault();
-      //   const index = parseInt(document.getElementById("editIndex").value);
-
-      //   movimientos[index].tema = document.getElementById("editTema").value;
-      //   movimientos[index].descripcion = document.getElementById("editDescripcion").value;
-      //   movimientos[index].monto = parseFloat(document.getElementById("editMonto").value);
-      //   movimientos[index].color = document.getElementById("editColor").value;
-      //   movimientos[index].fecha = document.getElementById("editFecha").value; // ✅ AHORA SÍ
-
-      //   localStorage.setItem("movimientos", JSON.stringify(movimientos));
-      //   document.getElementById("modalEditar").classList.add("hidden");
-      //   showToast("Movimiento editado correctamente", "info");
-      //   renderizar();
-      // };
-
-      document.getElementById("formEditar").onsubmit = async (e) => {
+      document.getElementById("formEditar").onsubmit = (e) => {
         e.preventDefault();
+        const index = parseInt(document.getElementById("editIndex").value);
 
-        const id = document.getElementById("editId").value;
+        movimientos[index].tema = document.getElementById("editTema").value;
+        movimientos[index].descripcion = document.getElementById("editDescripcion").value;
+        movimientos[index].monto = parseFloat(document.getElementById("editMonto").value);
+        movimientos[index].color = document.getElementById("editColor").value;
+        movimientos[index].fecha = document.getElementById("editFecha").value; // ✅ AHORA SÍ
 
-        const tema = document.getElementById("editTema").value;
-        const descripcion = document.getElementById("editDescripcion").value;
-        const monto = parseFloat(document.getElementById("editMonto").value);
-        const color = document.getElementById("editColor").value;
-        const fecha = document.getElementById("editFecha").value;
-
-        const { error } = await supabaseClient
-          .from("movimientos")
-          .update({
-            tema,
-            descripcion,
-            monto,
-            color,
-            fecha,
-          })
-          .eq("id", id);
-
-        if (error) {
-          console.error(error);
-          showToast("Error editando movimiento", "error");
-          return;
-        }
-
+        localStorage.setItem("movimientos", JSON.stringify(movimientos));
         document.getElementById("modalEditar").classList.add("hidden");
         showToast("Movimiento editado correctamente", "info");
-
-        await cargarMovimientos();
+        renderizar();
       };
 
       document.getElementById("btnEliminar").onclick = () => {
+        const index = parseInt(document.getElementById("editIndex").value);
+        // if (confirm("¿Seguro que querés eliminar este movimiento?")) {
+        //   movimientos.splice(index, 1);
+        //   localStorage.setItem("movimientos", JSON.stringify(movimientos));
+        //   document.getElementById("modalEditar").classList.add("hidden");
+        //   renderizar();
+        // }
+        indexAEliminar = parseInt(document.getElementById("editIndex").value);
         document.getElementById("modalConfirmar").classList.remove("hidden");
       };
 
@@ -728,37 +602,16 @@
         indexAEliminar = null;
       };
 
-      // document.getElementById("confirmarEliminacion").onclick = () => {
-      //   if (indexAEliminar !== null) {
-      //     movimientos.splice(indexAEliminar, 1);
-      //     localStorage.setItem("movimientos", JSON.stringify(movimientos));
-      //     document.getElementById("modalEditar").classList.add("hidden");
-      //     document.getElementById("modalConfirmar").classList.add("hidden");
-      //     renderizar();
-      //     showToast("Movimiento eliminado", "error");
-      //     indexAEliminar = null;
-      //   }
-      // };
-
-      document.getElementById("confirmarEliminacion").onclick = async () => {
-        const id = document.getElementById("editId").value;
-
-        if (!id) return;
-
-        const { error } = await supabaseClient.from("movimientos").delete().eq("id", id);
-
-        if (error) {
-          console.error(error);
-          showToast("Error eliminando movimiento", "error");
-          return;
+      document.getElementById("confirmarEliminacion").onclick = () => {
+        if (indexAEliminar !== null) {
+          movimientos.splice(indexAEliminar, 1);
+          localStorage.setItem("movimientos", JSON.stringify(movimientos));
+          document.getElementById("modalEditar").classList.add("hidden");
+          document.getElementById("modalConfirmar").classList.add("hidden");
+          renderizar();
+          showToast("Movimiento eliminado", "error");
+          indexAEliminar = null;
         }
-
-        document.getElementById("modalEditar").classList.add("hidden");
-        document.getElementById("modalConfirmar").classList.add("hidden");
-
-        showToast("Movimiento eliminado", "error");
-
-        await cargarMovimientos();
       };
 
       tabGastos.onclick = () => {
