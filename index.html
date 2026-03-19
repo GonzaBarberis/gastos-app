@@ -1,978 +1,1433 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Control de Gastos</title>
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Control de Gastos" />
-     <link rel="icon" href="favicon.ico" type="image/x-icon" />
-    <link rel="apple-touch-icon" href="icon-192.png" />
-    <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#047857" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Control de Gastos</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Control de Gastos" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#065f46" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --green-950: #022c22;
+      --green-900: #064e3b;
+      --green-800: #065f46;
+      --green-700: #047857;
+      --green-600: #059669;
+      --green-500: #10b981;
+      --green-400: #34d399;
+      --green-100: #d1fae5;
+      --green-50:  #ecfdf5;
 
-    <style>
-      body {
-        font-family: "Manrope", sans-serif;
-      }
+      --gray-950: #030712;
+      --gray-900: #111827;
+      --gray-800: #1f2937;
+      --gray-700: #374151;
+      --gray-600: #4b5563;
+      --gray-500: #6b7280;
+      --gray-400: #9ca3af;
+      --gray-300: #d1d5db;
+      --gray-200: #e5e7eb;
+      --gray-100: #f3f4f6;
+      --gray-50:  #f9fafb;
 
-      body,
-      html {
-        height: 100vh;
-        overflow: hidden;
-      }
+      --white: #ffffff;
+      --red-500: #ef4444;
+      --red-600: #dc2626;
+      --amber-400: #fbbf24;
 
-      @keyframes bounce-spin {
-        0% {
-          transform: scale(0.8) rotate(0deg);
-          opacity: 0;
-        }
-        50% {
-          transform: scale(1.05) rotate(180deg);
-          opacity: 1;
-        }
-        100% {
-          transform: scale(1) rotate(360deg);
-          opacity: 1;
-        }
-      }
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --radius-full: 9999px;
 
-      .animate-bounce-spin {
-        animation: bounce-spin 2s ease-out forwards;
-      }
-    </style>
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.05);
+      --shadow-modal: 0 20px 60px rgba(0,0,0,0.18), 0 8px 20px rgba(0,0,0,0.08);
+    }
 
-    <script>
-      const SUPABASE_URL = "https://ksulfxngebgwfdmokxei.supabase.co";
-      const SUPABASE_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdWxmeG5nZWJnd2ZkbW9reGVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5NTU3ODgsImV4cCI6MjA4MjUzMTc4OH0.KhAACT3bdfrvSvKnhp8L-4l_Du5ztU5PYG8hAfx9XDo";
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    </script>
-  </head>
-  <body class="bg-gray-100 text-gray-800">
-    <!-- Header Total -->
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--gray-100);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--gray-900);
+      -webkit-font-smoothing: antialiased;
+    }
 
-     <!-- Loader de carga -->
-  <div id="loader" class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-40 hidden">
-    <div class="flex flex-col items-center gap-3">
-      <i class="fas fa-spinner fa-spin text-emerald-600 text-4xl"></i>
-      <span class="text-sm text-gray-500">Cargando movimientos...</span>
+    /* ── LAYOUT ── */
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      max-width: 430px;
+      margin: 0 auto;
+      background: var(--gray-50);
+      position: relative;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(160deg, var(--green-900) 0%, var(--green-700) 100%);
+      padding: 28px 24px 32px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 6px;
+    }
+
+    .header-balance {
+      font-family: 'DM Mono', monospace;
+      font-size: 36px;
+      font-weight: 500;
+      color: #fff;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .header-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.8);
+      font-size: 18px;
+      backdrop-filter: blur(8px);
+    }
+
+    /* ── TABS ── */
+    .tabs-wrap {
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+      margin-top: -1px;
+    }
+
+    .tabs {
+      display: flex;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: var(--radius-full);
+      padding: 3px;
+      backdrop-filter: blur(12px);
+    }
+
+    .tab-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 9px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-radius: var(--radius-full);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: rgba(255,255,255,0.6);
+      background: transparent;
+    }
+
+    .tab-btn.active {
+      background: var(--white);
+      color: var(--green-800);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    .tab-btn i { font-size: 11px; }
+
+    /* ── MONTH NAV ── */
+    .month-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px 8px;
+      flex-shrink: 0;
+    }
+
+    .month-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-600);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .month-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-200);
+      background: var(--white);
+      color: var(--gray-500);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all 0.15s;
+    }
+
+    .month-btn:hover { border-color: var(--green-500); color: var(--green-700); background: var(--green-50); }
+
+    .order-btn {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--gray-200);
+      background: var(--white);
+      color: var(--gray-500);
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: all 0.15s;
+    }
+
+    .order-btn:hover { border-color: var(--green-400); color: var(--green-700); }
+
+    /* ── SUMMARY CARD ── */
+    .summary-card {
+      margin: 0 16px 12px;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .chart-wrap {
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .summary-info { flex: 1; min-width: 0; }
+
+    .summary-sublabel {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--gray-400);
+      margin-bottom: 4px;
+    }
+
+    .summary-amount {
+      font-family: 'DM Mono', monospace;
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--gray-900);
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-add-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--green-700);
+      background: var(--green-50);
+      border: 1px solid var(--green-100);
+      border-radius: var(--radius-full);
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-add-inline:hover { background: var(--green-100); border-color: var(--green-300); }
+
+    .export-btn {
+      background: none;
+      border: none;
+      color: var(--gray-300);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      transition: color 0.15s;
+    }
+
+    .export-btn:hover { color: var(--gray-600); }
+
+    /* ── LIST ── */
+    .list-wrap {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 16px 24px;
+      scrollbar-width: none;
+    }
+
+    .list-wrap::-webkit-scrollbar { display: none; }
+
+    .list { display: flex; flex-direction: column; gap: 8px; }
+
+    .item {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-100);
+      transition: box-shadow 0.2s, transform 0.15s;
+      animation: slideIn 0.22s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .item:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+    .item-dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .item-body { flex: 1; min-width: 0; }
+
+    .item-tema {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-800);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-desc {
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-date {
+      font-size: 10px;
+      color: var(--gray-400);
+      margin-top: 3px;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.02em;
+    }
+
+    .item-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    .item-amount-wrap { text-align: right; }
+
+    .item-amount {
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    .item-amount.gasto { color: var(--red-600); }
+    .item-amount.ingreso { color: var(--green-700); }
+
+    .item-pct {
+      font-size: 10px;
+      color: var(--gray-400);
+      margin-top: 2px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .item-edit-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-100);
+      background: var(--gray-50);
+      color: var(--gray-400);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .item-edit-btn:hover { border-color: var(--green-300); background: var(--green-50); color: var(--green-700); }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--gray-400);
+    }
+
+    .empty-state i { font-size: 32px; margin-bottom: 12px; display: block; opacity: 0.3; }
+    .empty-state p { font-size: 13px; }
+
+    /* ── LOADER ── */
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+
+    .loader.hidden { display: none; }
+
+    .loader-spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--green-100);
+      border-top-color: var(--green-600);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loader span { font-size: 12px; color: var(--gray-500); font-weight: 500; }
+
+    /* ── MODALS ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 50;
+      padding: 0;
+      backdrop-filter: blur(3px);
+      animation: fadeOverlay 0.2s ease;
+    }
+
+    @keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal-overlay.hidden { display: none; }
+
+    .modal-sheet {
+      background: var(--white);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      width: 100%;
+      max-width: 430px;
+      padding: 0 0 env(safe-area-inset-bottom, 16px);
+      box-shadow: var(--shadow-modal);
+      animation: slideUp 0.28s cubic-bezier(0.34, 1.2, 0.64, 1);
+      max-height: 92dvh;
+      overflow-y: auto;
+    }
+
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+    .modal-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--gray-200);
+      border-radius: 2px;
+      margin: 12px auto 20px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--gray-900);
+      padding: 0 20px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── FORM ── */
+    .form-body { padding: 0 20px; }
+
+    .form-group { margin-bottom: 14px; }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--gray-500);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: 11px 14px;
+      font-size: 15px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--gray-900);
+      background: var(--gray-50);
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--green-500);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.10);
+    }
+
+    .form-input.mono { font-family: 'DM Mono', monospace; font-size: 16px; }
+
+    /* ── COLOR GRID ── */
+    .color-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .color-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s;
+      border: 2px solid transparent;
+    }
+
+    .color-dot:hover { transform: scale(1.15); }
+
+    .color-dot.selected {
+      border-color: var(--green-600);
+      box-shadow: 0 0 0 2px rgba(5,150,105,0.25);
+      transform: scale(1.1);
+    }
+
+    /* ── FORM ACTIONS ── */
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      padding: 18px 20px 16px;
+      border-top: 1px solid var(--gray-100);
+      margin-top: 6px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 13px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: 0.01em;
+    }
+
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+
+    .btn-primary {
+      background: var(--green-700);
+      color: var(--white);
+    }
+
+    .btn-primary:hover:not(:disabled) { background: var(--green-800); }
+    .btn-primary:active:not(:disabled) { transform: scale(0.98); }
+
+    .btn-ghost {
+      background: var(--gray-100);
+      color: var(--gray-600);
+    }
+
+    .btn-ghost:hover { background: var(--gray-200); }
+
+    .btn-danger {
+      background: #fef2f2;
+      color: var(--red-600);
+      border: 1px solid #fecaca;
+    }
+
+    .btn-danger:hover { background: #fee2e2; }
+
+    .form-actions-edit {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 18px 20px 16px;
+      border-top: 1px solid var(--gray-100);
+      margin-top: 6px;
+    }
+
+    /* ── CONFIRM MODAL ── */
+    .modal-center {
+      align-items: center;
+      padding: 20px;
+    }
+
+    .confirm-sheet {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 340px;
+      padding: 24px 20px 20px;
+      box-shadow: var(--shadow-modal);
+      animation: popIn 0.22s cubic-bezier(0.34, 1.3, 0.64, 1);
+    }
+
+    @keyframes popIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+
+    .confirm-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #fef2f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--red-500);
+      margin: 0 auto 14px;
+    }
+
+    .confirm-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gray-900);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .confirm-desc {
+      font-size: 13px;
+      color: var(--gray-400);
+      text-align: center;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .confirm-actions { display: flex; gap: 10px; }
+
+    /* ── INITIAL MODAL ── */
+    .initial-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--green-900);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+    }
+
+    .initial-overlay.hidden { display: none; }
+
+    .initial-card {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      padding: 32px 24px;
+      width: 100%;
+      max-width: 340px;
+      text-align: center;
+    }
+
+    .initial-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--green-50);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--green-700);
+      margin: 0 auto 20px;
+    }
+
+    .initial-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .initial-desc {
+      font-size: 13px;
+      color: var(--gray-400);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: var(--gray-900);
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 18px;
+      border-radius: var(--radius-full);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      z-index: 999;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.success { background: var(--green-800); }
+    .toast.error   { background: var(--red-600); }
+    .toast.info    { background: #0369a1; }
+
+    /* ── SPLASH ── */
+    .splash {
+      position: fixed;
+      inset: 0;
+      background: var(--green-900);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      transition: opacity 0.5s;
+    }
+
+    .splash-inner {
+      width: 72px;
+      height: 72px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: white;
+      animation: splashPop 0.6s cubic-bezier(0.34,1.4,0.64,1) both;
+    }
+
+    @keyframes splashPop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--gray-400);
+      padding: 0 4px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Splash -->
+  <div class="splash" id="splash">
+    <div class="splash-inner"><i class="fas fa-leaf"></i></div>
+  </div>
+
+  <!-- Loader -->
+  <div class="loader hidden" id="loader">
+    <div class="loader-spinner"></div>
+    <span>Cargando...</span>
+  </div>
+
+  <!-- App -->
+  <div class="app">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <p class="header-label">Balance actual</p>
+          <p class="header-balance" id="total">$ 0</p>
+        </div>
+        <div class="header-icon"><i class="fas fa-leaf"></i></div>
+      </div>
+
+      <!-- Tabs dentro del header -->
+      <div class="tabs-wrap" style="margin-top: 20px;">
+        <div class="tabs">
+          <button class="tab-btn active" id="tabGastos">
+            <i class="fas fa-arrow-down"></i> Gastos
+          </button>
+          <button class="tab-btn" id="tabIngresos">
+            <i class="fas fa-arrow-up"></i> Ingresos
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Month nav -->
+    <div class="month-nav">
+      <button class="month-btn" id="mesAnterior"><i class="fas fa-chevron-left"></i></button>
+      <span class="month-label" id="mesActual">AGO 2025</span>
+      <button class="month-btn" id="mesSiguiente"><i class="fas fa-chevron-right"></i></button>
+      <button class="order-btn" id="btnOrden">Monto ↓</button>
+    </div>
+
+    <!-- Summary card -->
+    <div class="summary-card">
+      <div class="chart-wrap"><canvas id="grafico"></canvas></div>
+      <div class="summary-info">
+        <p class="summary-sublabel">Total del período</p>
+        <p class="summary-amount" id="totalGrafico">$ 0</p>
+        <button class="btn-add-inline" id="btnAgregar">
+          <i class="fas fa-plus"></i> Nuevo movimiento
+        </button>
+      </div>
+      <button class="export-btn" onclick="copiarBackup()" title="Exportar">
+        <i class="fas fa-file-export"></i>
+      </button>
+    </div>
+
+    <!-- List -->
+    <div class="list-wrap">
+      <div class="section-label" id="sectionLabel">
+        <span>Movimientos</span>
+      </div>
+      <ul class="list" id="lista"></ul>
+    </div>
+
+  </div>
+
+  <!-- ── MODAL AGREGAR ── -->
+  <div class="modal-overlay hidden" id="modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <p class="modal-title" id="modalTitle">Nuevo movimiento</p>
+      <div class="form-body">
+        <div class="form-group">
+          <label class="form-label">Monto</label>
+          <input class="form-input mono" type="tel" inputmode="decimal" id="monto" placeholder="0,00" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha</label>
+          <input class="form-input" type="date" id="fecha" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tema</label>
+          <input class="form-input" type="text" id="tema" placeholder="Ej: Supermercado" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción <span style="font-weight:400;opacity:.6">(opcional)</span></label>
+          <input class="form-input" type="text" id="descripcion" placeholder="Detalles adicionales" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color</label>
+          <div class="color-grid" id="colorSelector"></div>
+          <input type="hidden" id="color" value="#059669" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" id="cerrarModal">Cancelar</button>
+        <button class="btn btn-primary" id="btnGuardar">Guardar</button>
+      </div>
     </div>
   </div>
 
-    <div class="relative overflow-hidden bg-gradient-to-r from-emerald-700 to-emerald-600 text-white rounded-b-[2.5rem] shadow-lg p-7 mb-5">
-      <div class="flex justify-between items-center relative z-10">
-        <div>
-          <h1 class="text-xs font-semibold uppercase tracking-widest opacity-80">Balance actual</h1>
-          <p id="total" class="text-4xl font-extrabold mt-2 tracking-tight">$ 0</p>
+  <!-- ── MODAL EDITAR ── -->
+  <div class="modal-overlay hidden" id="modalEditar">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <p class="modal-title">Editar movimiento</p>
+      <div class="form-body">
+        <input type="hidden" id="editId" />
+        <div class="form-group">
+          <label class="form-label">Tema</label>
+          <input class="form-input" type="text" id="editTema" />
         </div>
-
-        <div class="w-14 h-14 flex items-center justify-center rounded-full bg-white bg-opacity-15 backdrop-blur-sm shadow-inner">
-          <i class="fas fa-sack-dollar text-2xl"></i>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <input class="form-input" type="text" id="editDescripcion" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monto</label>
+          <input class="form-input mono" type="tel" inputmode="decimal" id="editMonto" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha</label>
+          <input class="form-input" type="date" id="editFecha" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color</label>
+          <div class="color-grid" id="editColorSelector"></div>
+          <input type="hidden" id="editColor" value="#059669" />
         </div>
       </div>
-
-      <!-- elemento decorativo -->
-      <div class="absolute -right-6 -bottom-8 text-white text-[7rem] opacity-[0.08] pointer-events-none select-none">
-        <i class="fas fa-coins"></i>
-      </div>
-    </div>
-
-    <div class="bg-gray-100 px-4">
-      <div class="flex bg-white rounded-full shadow-inner p-1 max-w-xs mx-auto">
-        <button
-          id="tabGastos"
-          class="flex-1 flex items-center justify-center gap-2 py-2 px-4 text-sm font-medium rounded-full transition-all duration-200 text-white bg-emerald-600 shadow-md"
-        >
-          <i class="fas fa-arrow-down text-sm"></i>
-          GASTOS
+      <div class="form-actions-edit">
+        <button class="btn btn-danger" style="flex:none;padding:13px 16px;" id="btnEliminar">
+          <i class="fas fa-trash-alt"></i>
         </button>
-        <button
-          id="tabIngresos"
-          class="flex-1 flex items-center justify-center gap-2 py-2 px-4 text-sm font-medium rounded-full text-gray-600 hover:text-emerald-700 transition-all duration-200"
-        >
-          <i class="fas fa-arrow-up text-sm"></i>
-          INGRESOS
-        </button>
-      </div>
-    </div>
-
-    <div class="flex justify-center items-center gap-4 text-emerald-700 font-semibold text-sm mb-1 mt-2 select-none">
-      <button id="mesAnterior" class="text-xl px-2 hover:text-emerald-900"><i class="fas fa-caret-left"></i></button>
-      <span id="mesActual">AGO 2025</span>
-      <button id="mesSiguiente" class="text-xl px-2 hover:text-emerald-900"><i class="fas fa-caret-right"></i></button>
-
-      <button id="btnOrden" class="text-xs px-3 py-1 border rounded-full text-emerald-700 hover:bg-emerald-100 transition">Orden: Monto ↓</button>
-    </div>
-
-    <!-- Contenido -->
-    <!-- <div class="p-4">
-      <div class="bg-white shadow rounded-xl p-4 max-w-sm mx-auto mb-6">
-        <canvas id="grafico"></canvas>
-      </div>
-
-      <ul id="lista" class="space-y-3 max-w-sm mx-auto overflow-y-auto" style="max-height: 310px"></ul>
-    </div> -->
-
-    <div class="px-4 py-5 bg-gray-50">
-      <div class="relative max-w-sm mx-auto bg-white rounded-2xl px-5 py-4 mb-5" style="box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08)">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-3">
-          <span class="text-xs uppercase tracking-wide text-gray-400"> Últimos movimientos </span>
-
-          <button onclick="copiarBackup()" class="text-gray-400 hover:text-gray-700 transition" title="Exportar">
-            <i class="fas fa-file-export"></i>
-          </button>
-        </div>
-
-        <!-- Contenido horizontal -->
-        <div class="flex items-center gap-4">
-          <!-- Gráfico chico -->
-          <div class="w-28 h-28 flex-shrink-0">
-            <canvas id="grafico"></canvas>
-          </div>
-
-          <!-- Info -->
-          <div class="flex-1">
-            <div class="text-xs text-gray-400 mb-1">Total del período</div>
-            <div id="totalGrafico" class="text-3xl font-extrabold text-gray-800 tracking-tight">$ 0</div>
-
-            <button
-              id="btnAgregar"
-              class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-900 transition"
-            >
-              <i class="fas fa-plus-circle"></i>
-              Nuevo movimiento
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Lista -->
-      <ul id="lista" class="space-y-3 max-w-sm mx-auto overflow-y-auto px-1" style="max-height: 320px"></ul>
-    </div>
-
-    <!-- Botón flotante -->
-    <!-- <button
-      id="btnAgregar"
-      class="fixed bottom-6 right-6 bg-yellow-400 hover:bg-yellow-500 transition-colors text-black w-14 h-14 rounded-full text-2xl shadow-xl flex items-center justify-center"
-    >
-      <i class="fas fa-plus"></i>
-    </button> -->
-
-    <!-- Modal para agregar -->
-    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-      <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
-        <h2 class="text-xl font-bold mb-4 text-center">Nuevo movimiento</h2>
-        <form id="form">
-          <label class="block text-sm font-medium mb-1">Monto</label>
-          <input
-            type="tel"
-            inputmode="decimal"
-            id="monto"
-            placeholder="Monto ($)"
-            class="w-full border rounded px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            required
-          />
-
-          <label class="block text-sm font-medium mb-1">Fecha</label>
-          <input type="date" id="fecha" class="w-full border rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-
-          <label class="block text-sm font-medium mb-1">Tema</label>
-          <input
-            type="text"
-            id="tema"
-            placeholder="Ej: Placa de video"
-            class="w-full border rounded px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            required
-          />
-
-          <label class="block text-sm font-medium mb-1">Descripción</label>
-          <input
-            type="text"
-            id="descripcion"
-            placeholder="Opcional"
-            class="w-full border rounded px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
-
-          <label class="block text-sm font-medium mb-1">Color del gráfico</label>
-          <!-- <input type="color" id="color" class="w-full h-10 rounded mb-4 border" value="#facc15" /> -->
-          <div class="grid grid-cols-10 gap-2 mb-4" id="colorSelector"></div>
-          <input type="hidden" id="color" value="#facc15" />
-
-          <div class="flex justify-end gap-2">
-            <button type="button" id="cerrarModal" class="text-gray-500 px-4 py-2 border rounded">Cancelar</button>
-            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded font-semibold">Guardar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal de monto inicial -->
-    <div id="modalInicial" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-      <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-        <h2 class="text-xl font-bold mb-4 text-center">¿Con cuánto arrancás?</h2>
-        <label class="block text-sm font-medium mb-1">Monto inicial</label>
-        <input
-          id="inputInicial"
-          type="number"
-          placeholder="Ej: 50000"
-          class="w-full border rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        />
-        <div class="flex justify-end">
-          <button id="guardarInicial" class="bg-emerald-600 hover:bg-emerald-700 transition-colors text-white px-4 py-2 rounded font-semibold">
-            Guardar
-          </button>
+        <div style="display:flex;gap:10px;flex:1;">
+          <button class="btn btn-ghost" id="btnCancelarEditar">Cancelar</button>
+          <button class="btn btn-primary" id="btnGuardarEditar">Guardar</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Modal de edición -->
-    <div id="modalEditar" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-      <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
-        <h2 class="text-xl font-bold mb-4">Editar movimiento</h2>
-        <form id="formEditar">
-          <!-- <input type="hidden" id="editIndex" /> -->
-          <input type="hidden" id="editId" />
-
-          <label class="block text-sm font-medium mb-1">Tema</label>
-          <input type="text" id="editTema" class="w-full border rounded px-3 py-2 mb-3" required />
-
-          <label class="block text-sm font-medium mb-1">Descripción</label>
-          <input type="text" id="editDescripcion" class="w-full border rounded px-3 py-2 mb-3" />
-
-          <label class="block text-sm font-medium mb-1">Monto</label>
-          <input type="number" id="editMonto" class="w-full border rounded px-3 py-2 mb-3" required />
-
-          <label class="block text-sm font-medium mb-1">Fecha</label>
-          <input type="date" id="editFecha" class="w-full border rounded px-3 py-2 mb-3" />
-
-          <label class="block text-sm font-medium mb-1">Color</label>
-          <!-- <input type="color" id="editColor" class="w-full h-10 rounded mb-4 border" /> -->
-          <div class="grid grid-cols-10 gap-2 mb-4" id="editColorSelector"></div>
-          <input type="hidden" id="editColor" value="#facc15" />
-
-          <div class="flex justify-between items-center mt-4">
-            <button type="button" id="btnEliminar" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center gap-2">
-              <i class="fas fa-trash-alt"></i> Eliminar
-            </button>
-            <div class="flex gap-2">
-              <button type="button" id="btnCancelarEditar" class="text-gray-500 px-4 py-2 border rounded">Cancelar</button>
-              <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded">Guardar cambios</button>
-            </div>
-          </div>
-        </form>
+  <!-- ── CONFIRM DELETE ── -->
+  <div class="modal-overlay modal-center hidden" id="modalConfirmar">
+    <div class="confirm-sheet">
+      <div class="confirm-icon"><i class="fas fa-trash-alt"></i></div>
+      <p class="confirm-title">¿Eliminar movimiento?</p>
+      <p class="confirm-desc">Esta acción no se puede deshacer.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" id="cancelarConfirmacion">Cancelar</button>
+        <button class="btn btn-danger" style="background:#dc2626;color:#fff;border:none;" id="confirmarEliminacion">Eliminar</button>
       </div>
     </div>
+  </div>
 
-    <!-- Modal de confirmación para eliminar -->
-    <div id="modalConfirmar" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-      <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm text-center">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">¿Eliminar este movimiento?</h2>
-        <p class="text-sm text-gray-500 mb-6">Esta acción no se puede deshacer.</p>
-        <div class="flex justify-center gap-4">
-          <button id="cancelarConfirmacion" class="px-4 py-2 border rounded text-gray-500">Cancelar</button>
-          <button id="confirmarEliminacion" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Eliminar</button>
-        </div>
+  <!-- ── INITIAL SETUP ── -->
+  <div class="initial-overlay hidden" id="modalInicial">
+    <div class="initial-card">
+      <div class="initial-icon"><i class="fas fa-wallet"></i></div>
+      <p class="initial-title">¿Con cuánto arrancás?</p>
+      <p class="initial-desc">Ingresá tu balance inicial para hacer un seguimiento preciso.</p>
+      <div class="form-group">
+        <input class="form-input mono" type="tel" inputmode="decimal" id="inputInicial" placeholder="0" />
       </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px;" id="guardarInicial">Continuar</button>
     </div>
+  </div>
 
-    <script>
-      let indexAEliminar = null;
-      let renderCount = 0;
-      const totalEl = document.getElementById("total");
-      const lista = document.getElementById("lista");
-      const btnAgregar = document.getElementById("btnAgregar");
-      const modal = document.getElementById("modal");
-      const cerrarModal = document.getElementById("cerrarModal");
-      const form = document.getElementById("form");
-      const tabGastos = document.getElementById("tabGastos");
-      const tabIngresos = document.getElementById("tabIngresos");
-      const modalInicial = document.getElementById("modalInicial");
-      const inputInicial = document.getElementById("inputInicial");
-      const guardarInicial = document.getElementById("guardarInicial");
-      const ctx = document.getElementById("grafico").getContext("2d");
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
 
-      const loader = document.getElementById("loader");
+  <script>
+    const SUPABASE_URL = "https://ksulfxngebgwfdmokxei.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdWxmeG5nZWJnd2ZkbW9reGVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5NTU3ODgsImV4cCI6MjA4MjUzMTc4OH0.KhAACT3bdfrvSvKnhp8L-4l_Du5ztU5PYG8hAfx9XDo";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  </script>
 
-      function mostrarLoader() {
-        console.log('loader-on')
-        loader.classList.remove("hidden");
-      }
+  <script>
+    // ── COLORES ──
+    const COLORES = [
+      "#059669","#10b981","#34d399","#6ee7b7","#a7f3d0",
+      "#065f46","#047857","#064e3b","#022c22","#d1fae5",
+      "#3b82f6","#2563eb","#1d4ed8","#60a5fa","#93c5fd",
+      "#f97316","#ea580c","#fb923c","#fdba74","#fed7aa",
+      "#ef4444","#dc2626","#b91c1c","#f87171","#fca5a5",
+      "#8b5cf6","#7c3aed","#a78bfa","#c4b5fd","#ddd6fe",
+      "#f59e0b","#d97706","#fbbf24","#fcd34d","#fde68a",
+      "#ec4899","#db2777","#f472b6","#f9a8d4","#fce7f3",
+      "#14b8a6","#0d9488","#2dd4bf","#99f6e4","#ccfbf1",
+      "#6b7280","#4b5563","#374151","#9ca3af","#d1d5db",
+      "#111827","#1f2937","#f3f4f6","#e5e7eb","#ffffff",
+    ];
 
-      function ocultarLoader() {
-        loader.classList.add("hidden");
-      }
-
-      let modoOrden = "monto"; // "monto" | "fecha"
-
-      document.getElementById("btnOrden").onclick = () => {
-        modoOrden = modoOrden === "monto" ? "fecha" : "monto";
-
-        document.getElementById("btnOrden").textContent = modoOrden === "monto" ? "Orden: Monto ↓" : "Orden: Fecha ↓";
-
-        renderizar();
-      };
-
-      //let movimientos = JSON.parse(localStorage.getItem("movimientos")) || [];
-      //let totalInicial = parseFloat(localStorage.getItem("totalInicial")) || null;
-
-      let movimientos = [];
-
-      async function cargarMovimientos() {
-        mostrarLoader();
-
-        const { data, error } = await supabaseClient.from("movimientos").select("*").order("fecha", { ascending: true });
-
-        ocultarLoader();
-
-        if (error) {
-          console.error("Error cargando movimientos:", error);
-          return;
+    function renderColorSelector(containerId, inputId, selectedColor = "#059669") {
+      const container = document.getElementById(containerId);
+      const input = document.getElementById(inputId);
+      container.innerHTML = "";
+      COLORES.forEach(color => {
+        const div = document.createElement("div");
+        div.className = "color-dot" + (color === selectedColor ? " selected" : "");
+        div.style.backgroundColor = color;
+        if (color === '#ffffff' || color === '#f3f4f6' || color === '#e5e7eb') {
+          div.style.border = "1.5px solid #d1d5db";
         }
+        div.onclick = () => {
+          input.value = color;
+          container.querySelectorAll('.color-dot').forEach(c => c.classList.remove('selected'));
+          div.classList.add('selected');
+        };
+        container.appendChild(div);
+      });
+    }
 
-        movimientos = data;
-        renderizar();
-      }
+    // ── STATE ──
+    let movimientos = [];
+    let tipoVista = "gasto";
+    let modoOrden = "monto";
+    let mesActual = new Date();
+    let totalInicial = null;
 
-      cargarMovimientos();
+    // ── IDEMPOTENCIA ──
+    // Cada operación async tiene un flag de "en progreso" para evitar doble submit
+    let guardandoNuevo = false;
+    let guardandoEditar = false;
+    let eliminando = false;
 
-      let tipoVista = "gasto";
+    // ── REFS ──
+    const totalEl        = document.getElementById("total");
+    const lista          = document.getElementById("lista");
+    const modal          = document.getElementById("modal");
+    const modalEditar    = document.getElementById("modalEditar");
+    const modalConfirmar = document.getElementById("modalConfirmar");
+    const modalInicial   = document.getElementById("modalInicial");
+    const loader         = document.getElementById("loader");
+    const ctx            = document.getElementById("grafico").getContext("2d");
 
-      //if (!totalInicial) modalInicial.classList.remove("hidden");
+    // ── LOADER ──
+    function mostrarLoader() { loader.classList.remove("hidden"); }
+    function ocultarLoader() { loader.classList.add("hidden"); }
 
-      let totalInicial = localStorage.getItem("totalInicial");
+    // ── TOAST ──
+    let toastTimer = null;
+    function showToast(msg, tipo = "info") {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.className = "toast " + tipo + " show";
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
+    }
 
-      console.log("totalInicial", totalInicial, typeof totalInicial);
+    // ── MES ──
+    function actualizarMesTexto() {
+      const meses = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+      document.getElementById("mesActual").textContent =
+        `${meses[mesActual.getMonth()]} ${mesActual.getFullYear()}`;
+    }
 
-      let mesActual = new Date();
+    document.getElementById("mesAnterior").onclick = () => {
+      mesActual = new Date(mesActual.getFullYear(), mesActual.getMonth() - 1, 1);
+      actualizarMesTexto(); renderizar();
+    };
+    document.getElementById("mesSiguiente").onclick = () => {
+      mesActual = new Date(mesActual.getFullYear(), mesActual.getMonth() + 1, 1);
+      actualizarMesTexto(); renderizar();
+    };
 
-      actualizarMesTexto();
+    actualizarMesTexto();
 
-      document.getElementById("mesAnterior").onclick = () => {
-        mesActual.setMonth(mesActual.getMonth() - 1);
-        actualizarMesTexto();
-        renderizar();
-      };
+    // ── ORDEN ──
+    document.getElementById("btnOrden").onclick = () => {
+      modoOrden = modoOrden === "monto" ? "fecha" : "monto";
+      document.getElementById("btnOrden").textContent = modoOrden === "monto" ? "Monto ↓" : "Fecha ↓";
+      renderizar();
+    };
 
-      document.getElementById("mesSiguiente").onclick = () => {
-        mesActual.setMonth(mesActual.getMonth() + 1);
-        actualizarMesTexto();
-        renderizar();
-      };
+    // ── CARGAR ──
+    async function cargarMovimientos() {
+      mostrarLoader();
+      const { data, error } = await supabaseClient.from("movimientos").select("*").order("fecha", { ascending: true });
+      ocultarLoader();
+      if (error) { console.error(error); showToast("Error al cargar datos", "error"); return; }
+      movimientos = data;
+      renderizar();
+    }
 
-      function actualizarMesTexto() {
-        const meses = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
-        const mes = meses[mesActual.getMonth()];
-        const año = mesActual.getFullYear();
-        document.getElementById("mesActual").textContent = `${mes} ${año}`;
-      }
+    // ── RENDERIZAR ──
+    function renderizar() {
+      const año = mesActual.getFullYear();
+      const mes = mesActual.getMonth();
+      const hoy = new Date();
 
-      if (totalInicial === null) {
-        modalInicial.classList.remove("hidden");
-      } else {
-        modalInicial.classList.add("hidden");
-        totalInicial = parseFloat(totalInicial);
-      }
-
-      guardarInicial.onclick = () => {
-        const valor = parseFloat(inputInicial.value);
-        if (!isNaN(valor)) {
-          localStorage.setItem("totalInicial", valor);
-          totalInicial = valor;
-          modalInicial.classList.add("hidden");
-          renderizar();
+      const filtrados = movimientos.filter(m => {
+        if (!m.fecha) {
+          return hoy.getFullYear() === año && hoy.getMonth() === mes && m.tipo === tipoVista;
         }
-      };
-
-      window.addEventListener("load", () => {
-        const splash = document.getElementById("splash");
-        if (splash) {
-          splash.classList.add("opacity-0");
-          //setTimeout(() => splash.remove(), 700); // mismo tiempo que el fade-out
-          setTimeout(() => {
-            splash.classList.add("opacity-0");
-            setTimeout(() => splash.remove(), 700);
-          }, 1000); // espera 1 segundo antes
-        }
+        const f = new Date(m.fecha);
+        return f.getFullYear() === año && f.getMonth() === mes && m.tipo === tipoVista;
       });
 
-      const renderizar = () => {
-        //renderCount++;
-        //console.log("🔄 RENDER N°:", renderCount, "| Vista:", tipoVista);
+      if (modoOrden === "monto") filtrados.sort((a,b) => Number(b.monto) - Number(a.monto));
+      else filtrados.sort((a,b) => (b.fecha||"").localeCompare(a.fecha||""));
 
-        // const filtrados = movimientos.filter((m) => m.tipo === tipoVista);
+      lista.innerHTML = "";
 
-        const año = mesActual.getFullYear();
-        const mes = mesActual.getMonth(); // 0-11
+      let totalBalance = totalInicial ?? 0;
+      const resumen = {};
+      const colores = [];
 
-        const filtrados = movimientos.filter((m) => {
-          if (!m.fecha) {
-            // Mostrar los sin fecha SOLO si estamos en el mes actual
-            const hoy = new Date();
-            return hoy.getFullYear() === mesActual.getFullYear() && hoy.getMonth() === mesActual.getMonth() && m.tipo === tipoVista;
-          }
+      movimientos.forEach(m => {
+        totalBalance += m.tipo === "ingreso" ? Number(m.monto) : -Number(m.monto);
+      });
 
-          const f = new Date(m.fecha);
-          return f.getFullYear() === mesActual.getFullYear() && f.getMonth() === mesActual.getMonth() && m.tipo === tipoVista;
-        });
+      // Para gráfico: solo del período actual y tipo visible
+      filtrados.forEach(m => {
+        resumen[m.tema] = (resumen[m.tema] || 0) + Number(m.monto);
+      });
 
-        // filtrados.sort((a, b) => b.monto - a.monto);
+      const totalVista = filtrados.reduce((acc,m) => acc + Number(m.monto), 0);
+      document.getElementById("totalGrafico").textContent = `$ ${totalVista.toLocaleString("es-AR")}`;
+      totalEl.textContent = `$ ${totalBalance.toLocaleString("es-AR")}`;
 
-        if (modoOrden === "monto") {
-          filtrados.sort((a, b) => Number(b.monto) - Number(a.monto));
-        } else {
-          filtrados.sort((a, b) => b.fecha.localeCompare(a.fecha));
-        }
-
-        lista.innerHTML = "";
-
-        let total = totalInicial ?? 0;
-        const resumen = {};
-        const colores = [];
-
-        movimientos.forEach((m) => {
-          total += m.tipo === "ingreso" ? m.monto : -m.monto;
-
-          if (m.tipo === tipoVista) {
-            const f = new Date(m.fecha || "");
-            if (f.getFullYear() === año && f.getMonth() === mes) {
-              resumen[m.tema] = (resumen[m.tema] || 0) + m.monto;
-            }
-          }
-        });
-
-        // filtrados.forEach((m) => {
-        //   const li = document.createElement("li");
-        //   li.className = "bg-white rounded shadow p-3 flex justify-between items-center";
-        //   li.innerHTML = `<div><strong>${m.tema}</strong><br/><span class='text-sm text-gray-500'>${m.descripcion || ""}</span></div><div class='${
-        //     tipoVista === "gasto" ? "text-red-600" : "text-green-600"
-        //   } font-bold'>${m.monto.toLocaleString()} $</div>`;
-        //   lista.appendChild(li);
-        // });
-
-        //const totalVista = filtrados.reduce((acc, m) => acc + m.monto, 0);
-
-        const totalVista = filtrados.reduce((acc, m) => acc + Number(m.monto), 0);
-
-        filtrados.forEach((m) => {
-          const porcentaje = totalVista > 0 ? ((m.monto / totalVista) * 100).toFixed(1) : 0;
-
-          const temaCapitalizado = m.tema.charAt(0).toUpperCase() + m.tema.slice(1);
+      // Lista
+      if (filtrados.length === 0) {
+        lista.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-${tipoVista === 'gasto' ? 'receipt' : 'coins'}"></i>
+            <p>Sin ${tipoVista === 'gasto' ? 'gastos' : 'ingresos'} este mes</p>
+          </div>`;
+      } else {
+        filtrados.forEach(m => {
+          const pct = totalVista > 0 ? ((Number(m.monto) / totalVista) * 100).toFixed(0) : 0;
+          const temaLabel = m.tema.charAt(0).toUpperCase() + m.tema.slice(1);
           const li = document.createElement("li");
-
-          li.className = "bg-white rounded-2xl p-4 flex justify-between items-start gap-4 border-l-4";
-          li.style.borderColor = m.color || "#666";
-          li.style.boxShadow = "rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px";
-
-          // li.innerHTML = `
-          //     <div>
-          //     <span class="inline-block text-white text-sm font-semibold px-3 py-2 rounded-full mb-1"
-          //             style="background-color: ${m.color || "#666"}">
-          //           ${temaCapitalizado}
-          //     </span><br/>
-          //     <span class="text-sm text-gray-500">${m.descripcion || ""}</span>
-          //     </div>
-
-          //     <div class="flex items-center gap-3">
-          //     <div class="text-right">
-          //         <div class="${tipoVista === "gasto" ? "text-red-600" : "text-green-600"} font-bold">
-          //         $ ${m.monto.toLocaleString()}
-          //         </div>
-          //         <div class="text-xs text-gray-500">${porcentaje}%</div>
-          //     </div>
-
-          //    <button title="Editar" class="btn-editar text-gray-400 hover:text-gray-700 text-lg" data-index="${movimientos.indexOf(m)}">
-          //       <i class="fas fa-pen"></i>
-          //     </button>
-          //     </div>
-          // `;
-
+          li.className = "item";
           li.innerHTML = `
-            <div class="flex flex-col justify-between">
-              <span class="inline-block text-white text-sm font-semibold px-3 py-1 rounded-full mb-1"
-                    style="background-color: ${m.color || "#666"}">
-                ${temaCapitalizado}
-              </span>
-              ${m.descripcion ? `<span class="text-sm text-gray-600 leading-tight mb-1">${m.descripcion}</span>` : ""}
-             ${m.fecha ? `<span class="text-xs text-gray-400">${m.fecha.split("-").reverse().join("/")}</span>` : ""}
-
+            <div class="item-dot" style="background:${m.color||'#9ca3af'}"></div>
+            <div class="item-body">
+              <p class="item-tema">${temaLabel}</p>
+              ${m.descripcion ? `<p class="item-desc">${m.descripcion}</p>` : ""}
+              ${m.fecha ? `<p class="item-date">${m.fecha.split("-").reverse().join("/")}</p>` : ""}
             </div>
-
-            <div class="flex items-center gap-3">
-              <div class="text-right">
-                <div class="${tipoVista === "gasto" ? "text-red-600" : "text-green-600"} font-bold">
-                  $ ${m.monto.toLocaleString()}
-                </div>
-                <div class="text-xs text-gray-500">${porcentaje}%</div>
+            <div class="item-right">
+              <div class="item-amount-wrap">
+                <p class="item-amount ${tipoVista}">$ ${Number(m.monto).toLocaleString("es-AR")}</p>
+                <p class="item-pct">${pct}%</p>
               </div>
-
-              <button title="Editar" class="btn-editar text-gray-400 hover:text-gray-700 text-lg" data-index="${movimientos.indexOf(m)}">
+              <button class="item-edit-btn btn-editar" data-index="${movimientos.indexOf(m)}" title="Editar">
                 <i class="fas fa-pen"></i>
               </button>
-            </div>
-          `;
-
+            </div>`;
           lista.appendChild(li);
         });
+      }
 
-        totalEl.textContent = `$ ${total.toLocaleString()}`;
-
-        const temas = Object.keys(resumen);
-        const valores = Object.values(resumen);
-
-        const totalPeriodo = valores.reduce((acc, v) => acc + Number(v), 0);
-        document.getElementById("totalGrafico").textContent = `$ ${totalPeriodo.toLocaleString()}`;
-        temas.forEach((t) => {
-          const movimiento = movimientos.find((m) => m.tema === t && m.tipo === tipoVista);
-          colores.push(movimiento?.color || "#999");
-        });
-
-        //if (!ctx || typeof Chart === "undefined") return;
-
-        if (window.chart) window.chart.destroy();
-        // window.chart = new Chart(ctx, {
-        //   type: "doughnut",
-        //   data: {
-        //     //labels: temas,
-        //     datasets: [
-        //       {
-        //         data: valores,
-        //         backgroundColor: colores,
-        //       },
-        //     ],
-        //   },
-        //   // options: { plugins: { legend: { position: "bottom" } } },
-        // });
-
-        window.chart = new Chart(ctx, {
-          type: "doughnut",
-
-          data: {
-            //labels: temas,
-            datasets: [
-              {
-                data: valores,
-                backgroundColor: colores,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: "70%",
-            plugins: {
-              legend: { position: "bottom" },
-            },
-          },
-          // plugins: [
-          //   {
-          //     id: "centerText",
-          //     beforeDraw(chart) {
-          //       const { width } = chart;
-          //       const { height } = chart;
-          //       const ctx = chart.ctx;
-          //       ctx.restore();
-
-          //       const total = valores.reduce((a, b) => a + b, 0);
-          //       ctx.font = "bold 25px Manrope, sans-serif";
-          //       ctx.fillStyle = "#374151"; // gris oscuro
-          //       ctx.textAlign = "center";
-          //       ctx.textBaseline = "middle";
-          //       ctx.fillText(`$ ${total.toLocaleString()}`, width / 2, height / 2);
-          //       ctx.save();
-          //     },
-          //   },
-          // ],
-        });
-      };
-
-      renderizar();
-
-      document.addEventListener("click", (e) => {
-        if (e.target.closest(".btn-editar")) {
-          const index = e.target.closest(".btn-editar").dataset.index;
-          const m = movimientos[index];
-
-          document.getElementById("editId").value = m.id;
-
-          //document.getElementById("editIndex").value = index;
-          document.getElementById("editTema").value = m.tema;
-          document.getElementById("editDescripcion").value = m.descripcion || "";
-          document.getElementById("editMonto").value = m.monto;
-
-          // ✅ ACA agregás la fecha
-          document.getElementById("editFecha").value = m.fecha || new Date().toISOString().slice(0, 10);
-
-          renderColorSelector("editColorSelector", "editColor", m.color);
-          document.getElementById("editColor").value = m.color;
-
-          document.getElementById("modalEditar").classList.remove("hidden");
-        }
+      // Gráfico
+      const temas = Object.keys(resumen);
+      const valores = Object.values(resumen);
+      temas.forEach(t => {
+        const mov = movimientos.find(m => m.tema === t && m.tipo === tipoVista);
+        colores.push(mov?.color || "#9ca3af");
       });
 
-      document.getElementById("btnCancelarEditar").onclick = () => {
-        document.getElementById("modalEditar").classList.add("hidden");
-      };
-
-      // btnAgregar.onclick = () => modal.classList.remove("hidden");
-      btnAgregar.onclick = () => {
-        renderColorSelector("colorSelector", "color"); // <-- esto lo agregamos recién
-        document.getElementById("fecha").value = new Date().toISOString().slice(0, 10);
-        modal.classList.remove("hidden");
-      };
-      cerrarModal.onclick = () => modal.classList.add("hidden");
-
-      form.onsubmit = async (e) => {
-        e.preventDefault();
-
-        const monto = parseFloat(form.monto.value);
-        const tema = form.tema.value;
-        const descripcion = form.descripcion.value;
-        const color = form.color.value;
-        const fecha = form.fecha.value;
-        const hoy = new Date().toISOString().slice(0, 10);
-
-        if (!isNaN(monto) && tema) {
-          const { error } = await supabaseClient.from("movimientos").insert([
-            {
-              tipo: tipoVista,
-              monto,
-              tema,
-              descripcion,
-              color,
-              fecha: fecha,
-            },
-          ]);
-
-          if (error) {
-            console.error(error);
-            showToast("Error guardando movimiento", "error");
-            return;
-          }
-
-          form.reset();
-          modal.classList.add("hidden");
-          showToast("Movimiento agregado con éxito", "success");
-
-          await cargarMovimientos(); // 🔄 refresca desde BD
+      if (window.chart) window.chart.destroy();
+      window.chart = new Chart(ctx, {
+        type: "doughnut",
+        data: { datasets: [{ data: valores, backgroundColor: colores, borderWidth: 0, hoverOffset: 4 }] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "72%",
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          animation: { duration: 400 },
         }
-      };
+      });
+    }
 
-      // document.getElementById("formEditar").onsubmit = (e) => {
-      //   e.preventDefault();
-      //   const index = parseInt(document.getElementById("editIndex").value);
-
-      //   movimientos[index].tema = document.getElementById("editTema").value;
-      //   movimientos[index].descripcion = document.getElementById("editDescripcion").value;
-      //   movimientos[index].monto = parseFloat(document.getElementById("editMonto").value);
-      //   movimientos[index].color = document.getElementById("editColor").value;
-      //   movimientos[index].fecha = document.getElementById("editFecha").value; // ✅ AHORA SÍ
-
-      //   localStorage.setItem("movimientos", JSON.stringify(movimientos));
-      //   document.getElementById("modalEditar").classList.add("hidden");
-      //   showToast("Movimiento editado correctamente", "info");
-      //   renderizar();
-      // };
-
-      document.getElementById("formEditar").onsubmit = async (e) => {
-        e.preventDefault();
-
-        const id = document.getElementById("editId").value;
-
-        const tema = document.getElementById("editTema").value;
-        const descripcion = document.getElementById("editDescripcion").value;
-        const monto = parseFloat(document.getElementById("editMonto").value);
-        const color = document.getElementById("editColor").value;
-        const fecha = document.getElementById("editFecha").value;
-
-        const { error } = await supabaseClient
-          .from("movimientos")
-          .update({
-            tema,
-            descripcion,
-            monto,
-            color,
-            fecha,
-          })
-          .eq("id", id);
-
-        if (error) {
-          console.error(error);
-          showToast("Error editando movimiento", "error");
-          return;
-        }
-
-        document.getElementById("modalEditar").classList.add("hidden");
-        showToast("Movimiento editado correctamente", "info");
-
-        await cargarMovimientos();
-      };
-
-      document.getElementById("btnEliminar").onclick = () => {
-        document.getElementById("modalConfirmar").classList.remove("hidden");
-      };
-
-      document.getElementById("cancelarConfirmacion").onclick = () => {
-        document.getElementById("modalConfirmar").classList.add("hidden");
-        indexAEliminar = null;
-      };
-
-      // document.getElementById("confirmarEliminacion").onclick = () => {
-      //   if (indexAEliminar !== null) {
-      //     movimientos.splice(indexAEliminar, 1);
-      //     localStorage.setItem("movimientos", JSON.stringify(movimientos));
-      //     document.getElementById("modalEditar").classList.add("hidden");
-      //     document.getElementById("modalConfirmar").classList.add("hidden");
-      //     renderizar();
-      //     showToast("Movimiento eliminado", "error");
-      //     indexAEliminar = null;
-      //   }
-      // };
-
-      document.getElementById("confirmarEliminacion").onclick = async () => {
-        const id = document.getElementById("editId").value;
-
-        if (!id) return;
-
-        const { error } = await supabaseClient.from("movimientos").delete().eq("id", id);
-
-        if (error) {
-          console.error(error);
-          showToast("Error eliminando movimiento", "error");
-          return;
-        }
-
-        document.getElementById("modalEditar").classList.add("hidden");
-        document.getElementById("modalConfirmar").classList.add("hidden");
-
-        showToast("Movimiento eliminado", "error");
-
-        await cargarMovimientos();
-      };
-
-      tabGastos.onclick = () => {
-        if (tipoVista === "gasto") return;
-        tipoVista = "gasto";
-        tabGastos.classList.add("border-green-600", "text-green-600");
-        tabGastos.classList.remove("text-gray-500");
-        tabIngresos.classList.remove("border-green-600", "text-green-600");
-        tabIngresos.classList.add("text-gray-500");
-        renderizar();
-      };
-
-      tabIngresos.onclick = () => {
-        if (tipoVista === "ingreso") return;
-        tipoVista = "ingreso";
-        tabIngresos.classList.add("border-green-600", "text-green-600");
-        tabIngresos.classList.remove("text-gray-500");
-        tabGastos.classList.remove("border-green-600", "text-green-600");
-        tabGastos.classList.add("text-gray-500");
-        renderizar();
-      };
-
+    // ── TABS ──
+    function activarTab(tipo) {
+      tipoVista = tipo;
+      document.getElementById("tabGastos").classList.toggle("active", tipo === "gasto");
+      document.getElementById("tabIngresos").classList.toggle("active", tipo === "ingreso");
       renderizar();
+    }
 
-      const activarTab = (tipo) => {
-        tipoVista = tipo;
+    document.getElementById("tabGastos").onclick   = () => activarTab("gasto");
+    document.getElementById("tabIngresos").onclick = () => activarTab("ingreso");
 
-        if (tipo === "gasto") {
-          tabGastos.classList.add("bg-emerald-600", "text-white", "shadow-md");
-          tabGastos.classList.remove("text-gray-600", "hover:text-emerald-700");
+    // ── VALIDACIONES INPUT NUMÉRICO ──
+    // Solo dígitos y coma/punto decimal
+    function soloNumeros(e) {
+      const permitidos = ['0','1','2','3','4','5','6','7','8','9',',','.','Backspace','Delete','ArrowLeft','ArrowRight','Tab','Enter'];
+      if (!permitidos.includes(e.key)) e.preventDefault();
+      // Solo un separador decimal
+      const val = e.target.value;
+      if ((e.key === ',' || e.key === '.') && (val.includes(',') || val.includes('.'))) e.preventDefault();
+    }
 
-          tabIngresos.classList.remove("bg-emerald-600", "text-white", "shadow-md");
-          tabIngresos.classList.add("text-gray-600", "hover:text-emerald-700");
-        } else {
-          tabIngresos.classList.add("bg-emerald-600", "text-white", "shadow-md");
-          tabIngresos.classList.remove("text-gray-600", "hover:text-emerald-700");
+    ['monto','editMonto','inputInicial'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('keydown', soloNumeros);
+        el.addEventListener('paste', e => {
+          const text = e.clipboardData.getData('text');
+          if (!/^\d+([.,]\d+)?$/.test(text.trim())) e.preventDefault();
+        });
+      }
+    });
 
-          tabGastos.classList.remove("bg-emerald-600", "text-white", "shadow-md");
-          tabGastos.classList.add("text-gray-600", "hover:text-emerald-700");
-        }
+    // Prevenir letras en campos de texto cuando no corresponde
+    ['tema','editTema'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => {
+          // Capitalizar primer letra automáticamente
+          if (el.value.length === 1) el.value = el.value.toUpperCase();
+        });
+      }
+    });
 
+    // ── MODAL AGREGAR ──
+    document.getElementById("btnAgregar").onclick = () => {
+      document.getElementById("monto").value = "";
+      document.getElementById("tema").value = "";
+      document.getElementById("descripcion").value = "";
+      document.getElementById("fecha").value = new Date().toISOString().slice(0,10);
+      renderColorSelector("colorSelector","color","#059669");
+      document.getElementById("modalTitle").textContent =
+        tipoVista === "gasto" ? "Nuevo gasto" : "Nuevo ingreso";
+      guardandoNuevo = false;
+      document.getElementById("btnGuardar").disabled = false;
+      modal.classList.remove("hidden");
+      setTimeout(() => document.getElementById("monto").focus(), 300);
+    };
+
+    document.getElementById("cerrarModal").onclick = () => modal.classList.add("hidden");
+    modal.addEventListener("click", e => { if (e.target === modal) modal.classList.add("hidden"); });
+
+    // ── GUARDAR NUEVO (idempotente) ──
+    document.getElementById("btnGuardar").onclick = async () => {
+      if (guardandoNuevo) return;
+
+      const montoRaw = document.getElementById("monto").value.replace(",",".");
+      const monto = parseFloat(montoRaw);
+      const tema = document.getElementById("tema").value.trim();
+
+      if (isNaN(monto) || monto <= 0) { showToast("Ingresá un monto válido", "error"); return; }
+      if (!tema) { showToast("El tema es obligatorio", "error"); return; }
+
+      guardandoNuevo = true;
+      document.getElementById("btnGuardar").disabled = true;
+
+      const { error } = await supabaseClient.from("movimientos").insert([{
+        tipo: tipoVista,
+        monto,
+        tema,
+        descripcion: document.getElementById("descripcion").value.trim(),
+        color: document.getElementById("color").value,
+        fecha: document.getElementById("fecha").value,
+      }]);
+
+      if (error) {
+        console.error(error);
+        showToast("Error al guardar", "error");
+        guardandoNuevo = false;
+        document.getElementById("btnGuardar").disabled = false;
+        return;
+      }
+
+      modal.classList.add("hidden");
+      showToast("Movimiento guardado ✓", "success");
+      await cargarMovimientos();
+      // NO reseteamos guardandoNuevo acá; el modal se cerró, próxima apertura lo resetea
+    };
+
+    // ── EDITAR ──
+    document.addEventListener("click", e => {
+      const btn = e.target.closest(".btn-editar");
+      if (!btn) return;
+      const idx = parseInt(btn.dataset.index);
+      const m = movimientos[idx];
+      if (!m) return;
+
+      document.getElementById("editId").value = m.id;
+      document.getElementById("editTema").value = m.tema;
+      document.getElementById("editDescripcion").value = m.descripcion || "";
+      document.getElementById("editMonto").value = m.monto;
+      document.getElementById("editFecha").value = m.fecha || new Date().toISOString().slice(0,10);
+      renderColorSelector("editColorSelector","editColor", m.color || "#059669");
+      document.getElementById("editColor").value = m.color || "#059669";
+
+      guardandoEditar = false;
+      document.getElementById("btnGuardarEditar").disabled = false;
+      modalEditar.classList.remove("hidden");
+    });
+
+    document.getElementById("btnCancelarEditar").onclick = () => modalEditar.classList.add("hidden");
+    modalEditar.addEventListener("click", e => { if (e.target === modalEditar) modalEditar.classList.add("hidden"); });
+
+    // ── GUARDAR EDICIÓN (idempotente) ──
+    document.getElementById("btnGuardarEditar").onclick = async () => {
+      if (guardandoEditar) return;
+
+      const id = document.getElementById("editId").value;
+      const montoRaw = document.getElementById("editMonto").value.toString().replace(",",".");
+      const monto = parseFloat(montoRaw);
+      const tema = document.getElementById("editTema").value.trim();
+
+      if (isNaN(monto) || monto <= 0) { showToast("Ingresá un monto válido", "error"); return; }
+      if (!tema) { showToast("El tema es obligatorio", "error"); return; }
+
+      guardandoEditar = true;
+      document.getElementById("btnGuardarEditar").disabled = true;
+
+      const { error } = await supabaseClient.from("movimientos").update({
+        tema,
+        descripcion: document.getElementById("editDescripcion").value.trim(),
+        monto,
+        color: document.getElementById("editColor").value,
+        fecha: document.getElementById("editFecha").value,
+      }).eq("id", id);
+
+      if (error) {
+        console.error(error);
+        showToast("Error al editar", "error");
+        guardandoEditar = false;
+        document.getElementById("btnGuardarEditar").disabled = false;
+        return;
+      }
+
+      modalEditar.classList.add("hidden");
+      showToast("Cambios guardados ✓", "info");
+      await cargarMovimientos();
+    };
+
+    // ── ELIMINAR ──
+    document.getElementById("btnEliminar").onclick = () => {
+      eliminando = false;
+      document.getElementById("confirmarEliminacion").disabled = false;
+      modalConfirmar.classList.remove("hidden");
+    };
+
+    document.getElementById("cancelarConfirmacion").onclick = () => modalConfirmar.classList.add("hidden");
+    modalConfirmar.addEventListener("click", e => { if (e.target === modalConfirmar) modalConfirmar.classList.add("hidden"); });
+
+    // ── CONFIRMAR ELIMINAR (idempotente) ──
+    document.getElementById("confirmarEliminacion").onclick = async () => {
+      if (eliminando) return;
+      const id = document.getElementById("editId").value;
+      if (!id) return;
+
+      eliminando = true;
+      document.getElementById("confirmarEliminacion").disabled = true;
+
+      const { error } = await supabaseClient.from("movimientos").delete().eq("id", id);
+
+      if (error) {
+        console.error(error);
+        showToast("Error al eliminar", "error");
+        eliminando = false;
+        document.getElementById("confirmarEliminacion").disabled = false;
+        return;
+      }
+
+      modalEditar.classList.add("hidden");
+      modalConfirmar.classList.add("hidden");
+      showToast("Movimiento eliminado", "error");
+      await cargarMovimientos();
+    };
+
+    // ── TOTAL INICIAL ──
+    let _totalInicialRaw = localStorage.getItem("totalInicial");
+    if (_totalInicialRaw === null) {
+      modalInicial.classList.remove("hidden");
+    } else {
+      totalInicial = parseFloat(_totalInicialRaw);
+    }
+
+    document.getElementById("inputInicial").addEventListener("keydown", soloNumeros);
+
+    document.getElementById("guardarInicial").onclick = () => {
+      const raw = document.getElementById("inputInicial").value.replace(",",".");
+      const val = parseFloat(raw);
+      if (!isNaN(val)) {
+        localStorage.setItem("totalInicial", val);
+        totalInicial = val;
+        modalInicial.classList.add("hidden");
         renderizar();
-      };
+      } else {
+        showToast("Ingresá un número válido", "error");
+      }
+    };
 
-      tabGastos.onclick = () => activarTab("gasto");
-      tabIngresos.onclick = () => activarTab("ingreso");
+    // ── EXPORT ──
+    function copiarBackup() {
+      const data = JSON.stringify({ movimientos, totalInicial }, null, 2);
+      navigator.clipboard.writeText(data)
+        .then(() => showToast("Backup copiado al portapapeles ✓", "success"))
+        .catch(() => showToast("No se pudo copiar", "error"));
+    }
 
-      const COLORES_DISPONIBLES = [
-        // Amarillos
-        "#fef08a",
-        "#fde047",
-        "#facc15",
-        "#eab308",
-        "#ca8a04",
-        "#a16207",
-        "#854d0e",
-        "#713f12",
-        "#78350f",
-        "#451a03",
-        // Verdes
-        "#d9f99d",
-        "#bef264",
-        "#a3e635",
-        "#84cc16",
-        "#65a30d",
-        "#4d7c0f",
-        "#3f6212",
-        "#365314",
-        "#1a2e05",
-        "#052e16",
-        // Rojos
-        "#fecaca",
-        "#fca5a5",
-        "#f87171",
-        "#ef4444",
-        "#dc2626",
-        "#b91c1c",
-        "#991b1b",
-        "#7f1d1d",
-        "#450a0a",
-        "#1c0c0c",
-        // Azules
-        "#dbeafe",
-        "#bfdbfe",
-        "#93c5fd",
-        "#60a5fa",
-        "#3b82f6",
-        "#2563eb",
-        "#1d4ed8",
-        "#1e40af",
-        "#1e3a8a",
-        "#172554",
-        "#0c4a6e",
-        "#075985",
-        "#0369a1",
-        "#0284c7",
-        "#0ea5e9",
-        "#38bdf8",
-        "#7dd3fc",
-        "#bae6fd",
-        "#e0f2fe",
-        "#f0f9ff",
-        // Naranjas
-        "#ffedd5",
-        "#fed7aa",
-        "#fdba74",
-        "#fb923c",
-        "#f97316",
-        "#ea580c",
-        "#c2410c",
-        "#9a3412",
-        "#7c2d12",
-        "#431407",
-        // Grises (de blanco a negro)
-        "#f9fafb",
-        "#f3f4f6",
-        "#e5e7eb",
-        "#d1d5db",
-        "#9ca3af",
-        "#6b7280",
-        "#4b5563",
-        "#374151",
-        "#1f2937",
-        "#111827",
-      ];
-
-      function renderColorSelector(containerId, inputId, selectedColor = "#facc15") {
-        const container = document.getElementById(containerId);
-        const input = document.getElementById(inputId);
-        container.innerHTML = "";
-
-        COLORES_DISPONIBLES.forEach((color) => {
-          const div = document.createElement("div");
-          div.className = `w-6 h-6 rounded-full cursor-pointer border transition-all`;
-          div.style.backgroundColor = color;
-          if (color === selectedColor) {
-            div.classList.add("ring-2", "ring-emerald-500");
-          }
-
-          div.onclick = () => {
-            input.value = color;
-            [...container.children].forEach((c) => c.classList.remove("ring-2", "ring-emerald-500"));
-            div.classList.add("ring-2", "ring-emerald-500");
+    // ── SERVICE WORKER ──
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js").then(reg => {
+        reg.onupdatefound = () => {
+          const nw = reg.installing;
+          nw.onstatechange = () => {
+            if (nw.state === "installed" && navigator.serviceWorker.controller) {
+              showToast("Nueva versión disponible — tocá para actualizar", "info");
+              document.getElementById("toast").style.cursor = "pointer";
+              document.getElementById("toast").onclick = () => {
+                nw.postMessage({ action: "skipWaiting" });
+                window.location.reload();
+              };
+            }
           };
+        };
+      }).catch(() => {});
 
-          container.appendChild(div);
-        });
-      }
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (!refreshing) { window.location.reload(); refreshing = true; }
+      });
+    }
 
-      function showToast(mensaje, tipo = "info") {
-        const toast = document.getElementById("toast");
-        toast.textContent = mensaje;
+    // ── SPLASH ──
+    window.addEventListener("load", () => {
+      const splash = document.getElementById("splash");
+      setTimeout(() => {
+        splash.style.opacity = "0";
+        setTimeout(() => splash.remove(), 600);
+      }, 900);
+    });
 
-        // Cambia color según tipo
-        toast.classList.remove("bg-gray-800", "bg-green-600", "bg-red-600");
-        if (tipo === "success") toast.classList.add("bg-green-600");
-        else if (tipo === "error") toast.classList.add("bg-red-600");
-        else toast.classList.add("bg-cyan-500");
-
-        // Mostrar
-        toast.classList.remove("opacity-0");
-        toast.classList.add("opacity-100");
-
-        setTimeout(() => {
-          toast.classList.remove("opacity-100");
-          toast.classList.add("opacity-0");
-        }, 3000);
-      }
-
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("service-worker.js").then((reg) => {
-          reg.onupdatefound = () => {
-            const newWorker = reg.installing;
-            newWorker.onstatechange = () => {
-              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-                showToast("Nueva versión disponible. Tocá para actualizar", "info");
-
-                const toast = document.getElementById("toast");
-                toast.onclick = () => {
-                  newWorker.postMessage({ action: "skipWaiting" });
-                  window.location.reload();
-                };
-              }
-            };
-          };
-        });
-
-        let refreshing = false;
-        navigator.serviceWorker.addEventListener("controllerchange", () => {
-          if (!refreshing) {
-            window.location.reload();
-            refreshing = true;
-          }
-        });
-      }
-
-      function copiarBackup() {
-        const data = JSON.stringify(localStorage, null, 2);
-        navigator.clipboard
-          .writeText(data)
-          .then(() => alert("✅ Copiado al portapapeles"))
-          .catch((err) => {
-            alert("❌ No se pudo copiar. Probá en otro navegador.");
-            console.error(err);
-          });
-      }
-    </script>
-    <div
-      id="toast"
-      class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm px-4 py-2 rounded-lg shadow-lg opacity-0 pointer-events-none transition-all duration-500 z-50 whitespace-nowrap text-center max-w-[90vw]"
-    ></div>
-
-    <div id="splash" class="fixed inset-0 bg-[#006240] flex items-center justify-center z-50 transition-opacity duration-700">
-      <img src="icon-512.png" alt="Logo" class="w-24 h-24 animate-bounce-spin" />
-    </div>
-  </body>
-
- 
+    // ── INIT ──
+    cargarMovimientos();
+  </script>
+</body>
 </html>
